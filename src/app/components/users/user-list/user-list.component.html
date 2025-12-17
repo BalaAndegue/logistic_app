@@ -22,10 +22,10 @@
                     </td>
                     <td data-label="Phone">{{ user.phone || 'N/A' }}</td>
                     <td data-label="Actions">
-                        <button class="btn btn-info" (click)="edit.emit(user)" *ngIf="canManage">
+                        <button class="btn btn-info" (click)="edit.emit(user)" >
                             <i class="bi bi-pencil"></i> Edit
                         </button>
-                        <button class="btn btn-danger" (click)="delete.emit(user.id)" *ngIf="canManage">
+                        <button class="btn btn-danger" (click)="delete.emit(user.id)" >
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </td>

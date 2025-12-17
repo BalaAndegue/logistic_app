@@ -117,29 +117,75 @@ export class UsersComponent implements OnInit {
         }
     }
 
-    onFormSubmit(userData: Partial<User>) {
+        // CORRIGEZ la méthode onFormSubmit()
+    onFormSubmit(userData: any) {
+        console.log('Data from form:', userData); // Debug
+        
+        // Format Laravel standard - CHAMPS REQUIS
+        const apiData : any = {
+            name: userData.name,      // requis
+            email: userData.email,    // requis  
+            role: userData.role,      // requis
+            phone: userData.phone || null  // optionnel
+        };
+        
+        // Ajouter le mot de passe seulement s'il est fourni
+        if (userData.password && userData.password.trim() !== '') {
+            apiData['password'] = userData.password;
+            apiData['password_confirmation'] = userData.password_confirmation;
+        }
+        
+        console.log('Sending to API:', apiData); // Debug
+        
         if (this.isEditing && this.selectedUser?.id) {
-            this.usersService.updateUser(this.selectedUser.id, userData).subscribe({
-                next: () => {
+            this.usersService.updateUser(this.selectedUser.id, apiData).subscribe({
+                next: (response) => {
+                    console.log('API Response:', response);
                     this.showForm = false;
                     this.loadUsers();
                     this.loadStats();
+                    alert('User updated successfully!');
                 },
                 error: (error) => {
                     console.error('Error updating user:', error);
-                    alert('Failed to update user');
+                    // Afficher les erreurs spécifiques
+                    if (error.error?.errors) {
+                        let errorMessage = 'Validation errors:\n';
+                        Object.entries(error.error.errors).forEach(([field, messages]) => {
+                            errorMessage += `${field}: ${(messages as string[]).join(', ')}\n`;
+                        });
+                        alert(errorMessage);
+                    } else {
+                        alert(error.error?.message || 'Failed to update user');
+                    }
                 }
             });
         } else {
-            this.usersService.createUser(userData).subscribe({
-                next: () => {
+            // Pour la création, le mot de passe est requis
+            if (!userData.password || userData.password.trim() === '') {
+                alert('Password is required for new users');
+                return;
+            }
+            
+            this.usersService.createUser(apiData).subscribe({
+                next: (response) => {
+                    console.log('API Response:', response);
                     this.showForm = false;
                     this.loadUsers();
                     this.loadStats();
+                    alert('User created successfully!');
                 },
                 error: (error) => {
                     console.error('Error creating user:', error);
-                    alert('Failed to create user');
+                    if (error.error?.errors) {
+                        let errorMessage = 'Validation errors:\n';
+                        Object.entries(error.error.errors).forEach(([field, messages]) => {
+                            errorMessage += `${field}: ${(messages as string[]).join(', ')}\n`;
+                        });
+                        alert(errorMessage);
+                    } else {
+                        alert(error.error?.message || 'Failed to create user');
+                    }
                 }
             });
         }
