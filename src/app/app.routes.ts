@@ -3,6 +3,8 @@ import { LoginComponent } from './components/login/login.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { authGuard } from './guards/auth.guard';
+import { DeliveriesComponent } from './components/deliveries/deliveries.component';
+import { DriversComponent } from './components/drivers/drivers.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -13,6 +15,8 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: DashboardComponent },
+            { path: 'deliveries', component: DeliveriesComponent },
+            { path: 'drivers', component: DriversComponent },
             // Other routes will go here
         ]
     },
