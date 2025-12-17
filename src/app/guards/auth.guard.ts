@@ -2,21 +2,27 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+// auth.guard.ts (extrait modifié)
+export const authGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
     if (authService.currentUserValue) {
-        // Check if route has expected roles
+        // Vérifier aussi la présence du token
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            authService.clearSession();
+            return router.createUrlTree(['/login']);
+        }
+
         const expectedRoles = route.data['roles'];
         if (expectedRoles && !authService.hasRole(expectedRoles)) {
-            // Role not authorized, maybe redirect to home or unauthorized page
-            // For now, redirect to login or dashboard
-            return router.createUrlTree(['/']);
+            return router.createUrlTree(['/unauthorized']);
         }
         return true;
     }
 
-    // Not logged in
-    return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+    return router.createUrlTree(['/login'], { 
+        queryParams: { returnUrl: state.url } 
+    });
 };

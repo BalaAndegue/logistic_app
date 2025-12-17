@@ -1,4 +1,5 @@
-export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR';
+// user.model.ts
+export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'USER';
 
 export interface User {
     id: string;
@@ -6,4 +7,5 @@ export interface User {
     fullName: string;
     role: UserRole;
     avatarUrl?: string;
+    token?: string; // ← Nouveau champ
 }
