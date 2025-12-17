@@ -1,0 +1,29 @@
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class="bi bi-box-seam-fill logo"></i>
+        <span class="brand">LogisticsUi</span>
+    </div>
+
+    <div class="user-profile" *ngIf="currentUser">
+        <div class="avatar">
+            <img [src]="currentUser.avatarUrl || 'assets/default-avatar.png'" alt="User"
+                (error)="e.style.display='none'" #e>
+            <div class="fallback-avatar" *ngIf="e.style.display==='none'">{{ currentUser.fullName.charAt(0) }}</div>
+        </div>
+        <div class="info">
+            <div class="name">{{ currentUser.fullName }}</div>
+            <div class="role">{{ currentUser.role }}</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul>
+            <li *ngFor="let item of menuItems">
+                <a [routerLink]="item.route" routerLinkActive="active" class="nav-item">
+                    <i class="bi" [ngClass]="item.icon"></i>
+                    <span>{{ item.label }}</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

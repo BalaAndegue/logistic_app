@@ -1,0 +1,99 @@
+
+/* Global Styles */
+@import 'leaflet/dist/leaflet.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+:root {
+  --primary-color: #2563eb; /* Royal Blue */
+  --secondary-color: #475569; /* Slate */
+  --accent-color: #0ea5e9; /* Sky Blue */
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --background-color: #f8fafc;
+  --surface-color: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --header-height: 64px;
+  --sidebar-width: 260px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+// Utilities
+.card {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.875rem;
+
+  &.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    &:hover {
+      background-color: darken(#2563eb, 5%);
+    }
+  }
+
+  &.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+  }
+
+  &.btn-outline {
+    background-color: transparent;
+    border: 1px solid var(--secondary-color);
+    color: var(--text-primary);
+  }
+}
+
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s ease;
+}
+
+/* Sidebar toggle logic could go here */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+}

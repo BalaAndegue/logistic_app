@@ -1,0 +1,97 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--background-color) 0%, #e2e8f0 100%);
+}
+
+.login-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+
+    .logo-area {
+        text-align: center;
+        margin-bottom: 2rem;
+
+        i {
+            font-size: 3rem;
+            color: var(--primary-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+    }
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .input-wrapper {
+        position: relative;
+
+        i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+
+            &:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            }
+        }
+    }
+}
+
+.btn-block {
+    width: 100%;
+    padding: 0.875rem;
+    font-size: 1rem;
+}
+
+.demo-hint {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.alert-danger {
+    color: var(--danger-color);
+    background: #fef2f2;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
