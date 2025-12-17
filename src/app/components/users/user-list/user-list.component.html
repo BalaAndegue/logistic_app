@@ -1,3 +1,4 @@
+<!-- src/app/components/users/user-list/user-list.component.html -->
 <div class="user-list">
     <div class="table-responsive" *ngIf="!loading; else loadingTemplate">
         <table class="table">
@@ -12,20 +13,20 @@
             </thead>
             <tbody>
                 <tr *ngFor="let user of users">
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
+                    <td data-label="Name">{{ user.name }}</td>
+                    <td data-label="Email">{{ user.email }}</td>
+                    <td data-label="Role">
                         <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
                             {{ getRoleLabel(user.role) }}
                         </span>
                     </td>
-                    <td>{{ user.phone || '-' }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-info" (click)="edit.emit(user)" *ngIf="canManage">
-                            Edit
+                    <td data-label="Phone">{{ user.phone || 'N/A' }}</td>
+                    <td data-label="Actions">
+                        <button class="btn btn-info" (click)="edit.emit(user)" *ngIf="canManage">
+                            <i class="bi bi-pencil"></i> Edit
                         </button>
-                        <button class="btn btn-sm btn-danger" (click)="delete.emit(user.id)" *ngIf="canManage">
-                            Delete
+                        <button class="btn btn-danger" (click)="delete.emit(user.id)" *ngIf="canManage">
+                            <i class="bi bi-trash"></i> Delete
                         </button>
                     </td>
                 </tr>
@@ -33,7 +34,9 @@
         </table>
         
         <div *ngIf="users.length === 0" class="empty-state">
-            No users found
+            <i class="bi bi-people"></i>
+            <h4>No Users Found</h4>
+            <p>Try adjusting your search or add a new user</p>
         </div>
     </div>
 

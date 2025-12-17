@@ -8,12 +8,14 @@
     </div>
 
     <!-- Statistiques -->
-    <div class="stats-cards" *ngIf="stats">
-        <div class="stat-card" *ngFor="let role of ['admin', 'manager', 'supervisor', 'user']">
-            <div class="stat-value">{{ getRoleCount(role) }}</div>
-            <div class="stat-label">{{ role | titlecase }}</div>
-        </div>
+    <!-- Modifiez la partie statistiques comme ceci -->
+<div class="stats-cards" *ngIf="stats">
+    <div class="stat-card" *ngFor="let role of ['admin', 'manager', 'supervisor', 'user']" 
+         [attr.data-role]="role">
+        <div class="stat-value" [attr.data-role]="role">{{ getRoleCount(role) }}</div>
+        <div class="stat-label">{{ role | titlecase }}</div>
     </div>
+</div>
 
     <!-- Barre de recherche et filtres -->
     <div class="controls">
