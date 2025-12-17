@@ -1,0 +1,46 @@
+<div class="user-list">
+    <div class="table-responsive" *ngIf="!loading; else loadingTemplate">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of users">
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
+                            {{ getRoleLabel(user.role) }}
+                        </span>
+                    </td>
+                    <td>{{ user.phone || '-' }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" (click)="edit.emit(user)" *ngIf="canManage">
+                            Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" (click)="delete.emit(user.id)" *ngIf="canManage">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div *ngIf="users.length === 0" class="empty-state">
+            No users found
+        </div>
+    </div>
+
+    <ng-template #loadingTemplate>
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading users...</p>
+        </div>
+    </ng-template>
+</div>

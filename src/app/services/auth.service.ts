@@ -37,7 +37,7 @@ export class AuthService {
                 // Créer l'objet User à partir de la réponse
                 const user: User = {
                     id: response.user.id.toString(),
-                    username: response.user.name || response.user.email,
+                    name: response.user.name || response.user.email,
                     fullName: response.user.name,
                     role: this.mapRole(response.user.role || 'USER'), // Adaptez selon votre API
                     avatarUrl: response.user.avatar_url || 'assets/default-avatar.png',
