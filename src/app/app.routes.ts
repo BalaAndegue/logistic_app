@@ -14,6 +14,7 @@ export const routes: Routes = [
     // Inside your app.routes.ts children array:
     { 
     path: 'supervisor', 
+    component: MainLayoutComponent,
     children: [
         { path: 'dashboard', component: SupervisorDashboardComponent },
         { path: 'realtime', component: SupervisorRealtimeComponent }, // Next step

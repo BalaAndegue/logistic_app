@@ -1,7 +1,5 @@
 .dashboard-container {
-    h2 {
-        margin-bottom: 2rem;
-    }
+    h2 { margin-bottom: 2rem; }
 }
 
 .stats-grid {
@@ -15,6 +13,10 @@
     display: flex;
     align-items: center;
     padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
     .icon-wrapper {
         width: 60px;
@@ -28,65 +30,30 @@
     }
 
     .stat-info {
-        h3 {
-            font-size: 2rem;
-            margin: 0;
-            line-height: 1.2;
-        }
-
-        p {
-            margin: 0;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
+        h3 { font-size: 2rem; margin: 0; line-height: 1.2; font-weight: 700; }
+        p { margin: 0; color: #64748b; font-size: 0.9rem; }
     }
 
-    &.ready .icon-wrapper {
-        background-color: #e0f2fe;
-        color: var(--accent-color);
-    }
-
-    &.processing .icon-wrapper {
-        background-color: #ede9fe;
-        color: var(--primary-color);
-    }
-
-    &.delivered .icon-wrapper {
-        background-color: #d1fae5;
-        color: var(--success-color);
-    }
-
-    &.failed .icon-wrapper {
-        background-color: #fee2e2;
-        color: var(--danger-color);
-    }
+    &.ready .icon-wrapper { background-color: #e0f2fe; color: #0ea5e9; }
+    &.processing .icon-wrapper { background-color: #ede9fe; color: #8b5cf6; }
+    &.delivered .icon-wrapper { background-color: #d1fae5; color: #10b981; }
+    &.failed .icon-wrapper { background-color: #fee2e2; color: #ef4444; }
 }
 
-.charts-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-}
+.charts-row { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 
 .chart-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
     .card-header {
         margin-bottom: 1.5rem;
-
-        h3 {
-            font-size: 1.1rem;
-            margin: 0;
-        }
+        h3 { font-size: 1.1rem; margin: 0; font-weight: 600; }
     }
 
-    .chart-container {
-        position: relative;
-        height: 350px;
-        width: 100%;
-    }
+    .chart-container { position: relative; height: 350px; width: 100%; }
 }
 
-.loading-state {
-    display: flex;
-    justify-content: center;
-    padding: 4rem;
-}
+.loading-state { display: flex; flex-direction: column; align-items: center; padding: 4rem; }

@@ -1,7 +1,7 @@
 <div class="dashboard-container">
     <h2>Supervisor Operational Overview</h2>
 
-    <div class="stats-grid" *ngIf="stats; else loadingTpl">
+    <div class="stats-grid" *ngIf="!loading && stats; else loadingTpl">
         <div class="card stat-card ready">
             <div class="icon-wrapper"><i class="bi bi-clock-history"></i></div>
             <div class="stat-info">
@@ -49,9 +49,10 @@
 </div>
 
 <ng-template #loadingTpl>
-    <div class="loading-state">
+    <div class="loading-state text-center py-5">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
+        <p class="mt-2 text-muted">Fetching operational data...</p>
     </div>
 </ng-template>
