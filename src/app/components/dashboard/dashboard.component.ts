@@ -26,6 +26,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   orderStatusDistribution: OrderStatusDistribution | null = null;
   topProducts: TopProduct[] = [];
   
+  showDemoIndicator = false;
+  showDistributionDemo = false;
+
   loading = true;
   error: string | null = null;
   
@@ -159,8 +162,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadAllData() {
     this.loading = true;
     this.error = null;
+    this.showDemoIndicator = false;
+    this.showDistributionDemo = false;
     
-    // Charger les données en parallèle mais gérer la fin du chargement
+    // Charger les données en parallèle
     this.loadKPIs();
     this.loadOrderStatusDistribution();
     this.loadCharts();
@@ -188,11 +193,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: (data) => {
         console.log('📊 Données graphique reçues:', data);
         
-        if (!data || data.labels?.[0] === 'Pas de données') {
+        // Détecter si ce sont des données de démonstration
+        const isDemoData = data.datasets?.[0]?.label?.includes('exemple') || 
+                          data.datasets?.[0]?.label?.includes('démonstration') ||
+                          data.datasets?.[0]?.label?.includes('estimé') ||
+                          data.datasets?.[0]?.label?.includes('(exemple)') ||
+                          data.datasets?.[0]?.label?.includes('(estimé)') ||
+                          data.datasets?.[0]?.label?.includes('Démonstration');
+        
+        this.showDemoIndicator = isDemoData;
+        
+        // Vérifier si on a des données valides
+        if (!data || !data.labels || data.labels.length === 0 || 
+            (data.labels.length === 1 && data.labels[0] === 'Pas de données')) {
           console.warn('⚠️ Pas de données pour le graphique');
           this.setEmptyChartData();
+          this.showDemoIndicator = true;
           return;
         }
+        
+        console.log('✅ Données graphique valides:', {
+          labels: data.labels,
+          datasets: data.datasets?.length
+        });
         
         this.lineChartData = {
           labels: data.labels || [],
@@ -209,6 +232,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('❌ Erreur chargement graphique:', error);
         this.setEmptyChartData();
+        this.showDemoIndicator = true;
       }
     });
   }
@@ -220,6 +244,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(
         catchError(error => {
           console.error('❌ Erreur API distribution:', error);
+          this.showDistributionDemo = true;
           return of({
             message: 'Erreur API',
             data: {} as OrderStatusDistribution
@@ -231,17 +256,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
           console.log('✅ Distribution des statuts reçue:', response);
           this.orderStatusDistribution = response.data;
           
+          // Détecter si ce sont des données incomplètes
           if (!this.orderStatusDistribution || Object.keys(this.orderStatusDistribution).length === 0) {
             console.warn('⚠️ Données de distribution vides');
             this.setEmptyDoughnutChart();
+            this.showDistributionDemo = true;
             return;
           }
           
+          // Vérifier si les données sont complètes
+          const hasCompleteData = Object.values(this.orderStatusDistribution)
+            .some(value => value !== undefined && value > 0);
+          
+          this.showDistributionDemo = !hasCompleteData;
           this.updateDoughnutChart();
         },
         error: (error) => {
           console.error('❌ Erreur chargement order status:', error);
           this.setEmptyDoughnutChart();
+          this.showDistributionDemo = true;
         }
       });
   }
@@ -380,6 +413,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   refreshData() {
     this.loading = true;
     this.error = null;
+    this.showDemoIndicator = false;
+    this.showDistributionDemo = false;
     this.loadAllData();
   }
 
@@ -394,7 +429,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   formatCurrencyShortCFA(amount: number): string {
-    if (!amount) return '0 FCFA';
+    if (!amount && amount !== 0) return '0 FCFA';
     
     const amountCFA = amount * this.EUR_TO_CFA;
     
@@ -437,64 +472,64 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   getOrderStatusSummary(): any[] {
-  if (!this.orderStatusDistribution) {
-    return [];
+    if (!this.orderStatusDistribution) {
+      return [];
+    }
+    
+    const colors = {
+      'PENDING': '#4dabf7',
+      'PENDING_PAYMENT': '#4dabf7',
+      'DELIVERED': '#51cf66',
+      'IN_PROGRESS': '#ffd43b',
+      'EN_ROUTE': '#ffd43b',
+      'CANCELLED': '#ff6b6b',
+      'READY_TO_SHIP': '#cc5de8'
+    };
+    
+    return Object.entries(this.orderStatusDistribution)
+      .map(([key, value]) => ({
+        label: this.formatStatusLabel(key),
+        value: value !== undefined ? value : 0,
+        color: colors[key as keyof typeof colors] || '#868e96'
+      }));
   }
-  
-  const colors = {
-    'PENDING': '#4dabf7',
-    'PENDING_PAYMENT': '#4dabf7',
-    'DELIVERED': '#51cf66',
-    'IN_PROGRESS': '#ffd43b',
-    'EN_ROUTE': '#ffd43b',
-    'CANCELLED': '#ff6b6b',
-    'READY_TO_SHIP': '#cc5de8'
-  };
-  
-  return Object.entries(this.orderStatusDistribution)
-    .map(([key, value]) => ({
-      label: this.formatStatusLabel(key),
-      value: value !== undefined ? value : 0,
-      color: colors[key as keyof typeof colors] || '#868e96'
-    }));
-}
-
 
   shouldShowStatusSummary(): boolean {
-  if (!this.orderStatusDistribution) {
-    return false;
-  }
-  
-  // Calculer le total en évitant les undefined
-  let total = 0;
-  Object.values(this.orderStatusDistribution).forEach(val => {
-    if (val !== undefined) {
-      total += val;
+    if (!this.orderStatusDistribution) {
+      return false;
     }
-  });
-  
-  return total > 0;
-}
+    
+    // Calculer le total en évitant les undefined
+    let total = 0;
+    Object.values(this.orderStatusDistribution).forEach(val => {
+      if (val !== undefined) {
+        total += val;
+      }
+    });
+    
+    return total > 0;
+  }
+
   getStatusPercentage(value: number): string | null {
-  if (!this.orderStatusDistribution) {
-    return null;
-  }
-  
-  // Calculer le total en évitant les undefined
-  let total = 0;
-  Object.values(this.orderStatusDistribution).forEach(val => {
-    if (val !== undefined) {
-      total += val;
+    if (!this.orderStatusDistribution) {
+      return null;
     }
-  });
-  
-  if (total <= 0) {
-    return null;
+    
+    // Calculer le total en évitant les undefined
+    let total = 0;
+    Object.values(this.orderStatusDistribution).forEach(val => {
+      if (val !== undefined) {
+        total += val;
+      }
+    });
+    
+    if (total <= 0) {
+      return null;
+    }
+    
+    const percentage = (value / total * 100);
+    return percentage.toFixed(1);
   }
-  
-  const percentage = (value / total * 100);
-  return percentage.toFixed(1);
-}
 
   exportTopProducts() {
     if (this.topProducts.length === 0) {
@@ -539,6 +574,52 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   hasAuthData(): boolean {
     return !!localStorage.getItem('auth_token');
+  }
+
+  // Méthodes de débogage (optionnelles)
+  checkAuth() {
+    const token = localStorage.getItem('auth_token');
+    console.log('🔐 Token actuel:', {
+      exists: !!token,
+      length: token?.length,
+      preview: token ? `${token.substring(0, 20)}...` : 'Aucun'
+    });
+  }
+
+  testAPIAuth(token: string) {
+    const url = 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/api/dashboard/sales-over-time?period=day&days=7';
+    
+    console.log('🔍 Test API avec token...');
+    
+    fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      console.log('📡 Réponse HTTP:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        type: response.type
+      });
+      
+      // Extraire les headers
+      const headers: any = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      console.log('📋 Headers:', headers);
+      
+      return response.json();
+    })
+    .then(data => {
+      console.log('📊 Données API:', data);
+    })
+    .catch(error => {
+      console.error('❌ Erreur fetch:', error);
+    });
   }
 
   ngOnDestroy() {

@@ -82,15 +82,32 @@ export class StatsService {
 
   // Récupérer les headers d'authentification
   private getAuthHeaders() {
-    const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('auth_token');
+  
+  if (!token) {
+    console.error('❌ Aucun token d\'authentification trouvé');
+    // Retourner des headers basiques sans auth
     return {
       headers: new HttpHeaders({
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       })
     };
   }
+  
+  console.log('🔐 Utilisation du token:', {
+    length: token.length,
+    startsWith: token.substring(0, 20)
+  });
+  
+  return {
+    headers: new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    })
+  };
+}
 
   // Récupérer les KPIs
   getKPIs(): Observable<ApiResponse<DashboardKPIs>> {
@@ -112,30 +129,51 @@ export class StatsService {
 
   // Récupérer les ventes dans le temps
   getSalesOverTime(period: 'day' | 'week' | 'month' = 'day', days: number = 7): Observable<ApiResponse<SalesOverTime[]>> {
-    console.log('📡 Appel API: getSalesOverTime');
-    
-    let params = new HttpParams()
-      .set('period', period)
-      .set('days', days.toString());
-    
-    const options = {
-      params: params,
-      ...this.getAuthHeaders()
-    };
-    
-    return this.http.get<ApiResponse<SalesOverTime[]>>(
-      `${this.apiUrl}/sales-over-time`, 
-      options
-    ).pipe(
-      tap(response => {
-        console.log('✅ SalesOverTime reçus:', response.data?.length || 0, 'enregistrements');
-      }),
-      catchError(error => {
-        console.error('❌ Erreur getSalesOverTime:', error);
-        return this.handleError<SalesOverTime[]>(error);
-      })
-    );
-  }
+  console.log('📡 Appel API: getSalesOverTime', { period, days });
+  
+  let params = new HttpParams()
+    .set('period', period)
+    .set('days', days.toString());
+  
+  const options = {
+    params: params,
+    ...this.getAuthHeaders()
+  };
+  
+  return this.http.get<ApiResponse<SalesOverTime[]>>(
+    `${this.apiUrl}/sales-over-time`, 
+    options
+  ).pipe(
+    tap(response => {
+      console.log('📊 Réponse sales-over-time:', {
+        message: response.message,
+        hasData: !!response.data,
+        isServerError: response.message === 'Server Error'
+      });
+    }),
+    catchError(error => {
+      console.error('❌ Erreur getSalesOverTime:', {
+        status: error.status,
+        statusText: error.statusText,
+        message: error.message,
+        error: error.error
+      });
+      
+      // Retourner une réponse structurée même en cas d'erreur
+      if (error.status === 500) {
+        return of({
+          message: 'Server Error',
+          data: [] as SalesOverTime[]
+        });
+      }
+      
+      return of({
+        message: error.status === 401 ? 'Session expirée' : 'Erreur API',
+        data: [] as SalesOverTime[]
+      });
+    })
+  );
+}
 
   // Récupérer les produits les plus vendus
   getTopProducts(limit: number = 5): Observable<ApiResponse<TopProduct[]>> {
@@ -182,97 +220,156 @@ export class StatsService {
 
   // Convertir les données de vente pour Chart.js - OPTIMISÉ POUR CFA
   getDeliveryTrends(): Observable<ChartData> {
-    console.log('📡 Début getDeliveryTrends');
-    
-    return new Observable<ChartData>(subscriber => {
-      this.getSalesOverTime('day', 7).subscribe({
-        next: (response) => {
-          try {
-            const data = response.data;
-            
-            if (!data || data.length === 0) {
-              console.warn('⚠️ Aucune donnée disponible pour le graphique');
-              subscriber.next(this.getEmptyChartData());
-              subscriber.complete();
-              return;
-            }
-
-            // Formatage des dates pour les labels
-            const labels = data.map(item => {
-              try {
-                const [year, month, day] = item.label.split('-').map(Number);
-                const date = new Date(year, month - 1, day);
-                return date.toLocaleDateString('fr-FR', { 
-                  weekday: 'short', 
-                  day: 'numeric' 
-                });
-              } catch (e) {
-                return item.label;
-              }
-            });
-
-            const deliveriesData = data.map(item => item.order_count || 0);
-            
-            // CONVERSION € → CFA et normalisation en milliers
-            const revenueData = data.map(item => {
-              const revenue = item.revenue || 0;
-              return (revenue * EUR_TO_CFA) / 1000; // Milliers de CFA
-            });
-
-            // Création des données de graphique
-            const chartData: ChartData = {
-              labels: labels,
-              datasets: [
-                {
-                  label: 'Livraisons',
-                  data: deliveriesData,
-                  borderColor: 'rgb(59, 130, 246)', // Bleu
-                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                  borderWidth: 2,
-                  yAxisID: 'y',
-                  pointRadius: 4,
-                  pointBackgroundColor: 'rgb(59, 130, 246)',
-                  tension: 0.4,
-                  fill: false
-                },
-                {
-                  label: 'Revenu (Mille FCFA)',
-                  data: revenueData,
-                  borderColor: 'rgb(255, 193, 7)', // Or pour CFA
-                  backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                  borderWidth: 2,
-                  yAxisID: 'y1',
-                  pointRadius: 4,
-                  pointBackgroundColor: 'rgb(255, 193, 7)',
-                  tension: 0.4,
-                  fill: false
-                }
-              ]
-            };
-
-            console.log('✅ Graphique formaté (CFA):', {
-              labelsCount: labels.length,
-              deliveriesData: deliveriesData,
-              revenueDataCFA: revenueData
-            });
-            
-            subscriber.next(chartData);
+  console.log('📡 Début getDeliveryTrends');
+  
+  return new Observable<ChartData>(subscriber => {
+   this.getSalesOverTime('day', 7).subscribe({
+      next: (response) => {
+        try {
+          // VÉRIFIER SI C'EST UNE ERREUR SERVEUR
+          if (response.message === 'Server Error') {
+            console.warn('⚠️ API sales-over-time retourne une erreur serveur');
+            console.log('Utilisation des données de démonstration...');
+            subscriber.next(this.getFallbackChartData());
             subscriber.complete();
-            
-          } catch (error) {
-            console.error('❌ Erreur lors du formatage:', error);
-            subscriber.next(this.getEmptyChartData());
-            subscriber.complete();
+            return;
           }
-        },
-        error: (error) => {
-          console.error('❌ Erreur API sales-over-time:', error);
-          subscriber.next(this.getEmptyChartData());
+          
+          let data = response.data;
+          
+          if (!data || data.length === 0) {
+            console.warn('⚠️ Aucune donnée disponible pour le graphique');
+            subscriber.next(this.getFallbackChartData());
+            subscriber.complete();
+            return;
+          }
+
+          // Vérifier si on a des données réelles
+          const hasRealData = data.some(item => 
+            (item.order_count && item.order_count > 0) || 
+            (item.revenue && item.revenue > 0)
+          );
+          
+          if (!hasRealData) {
+            console.warn('⚠️ Données toutes à zéro');
+            subscriber.next(this.getFallbackChartData());
+            subscriber.complete();
+            return;
+          }
+
+          // Formatage des dates pour les labels
+          const labels = data.map(item => {
+            try {
+              const [year, month, day] = item.label.split('-').map(Number);
+              const date = new Date(year, month - 1, day);
+              return date.toLocaleDateString('fr-FR', { 
+                weekday: 'short', 
+                day: 'numeric' 
+              });
+            } catch (e) {
+              return item.label;
+            }
+          });
+
+          const deliveriesData = data.map(item => item.order_count || 0);
+          
+          // CONVERSION € → CFA et normalisation en milliers
+          const revenueData = data.map(item => {
+            const revenue = item.revenue || 0;
+            return (revenue * EUR_TO_CFA) / 1000; // Milliers de CFA
+          });
+
+          // Création des données de graphique
+          const chartData: ChartData = {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Livraisons',
+                data: deliveriesData,
+                borderColor: 'rgb(59, 130, 246)', // Bleu
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                yAxisID: 'y',
+                pointRadius: 4,
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+                tension: 0.4,
+                fill: false
+              },
+              {
+                label: 'Revenu (Mille FCFA)',
+                data: revenueData,
+                borderColor: 'rgb(255, 193, 7)', // Or pour CFA
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                borderWidth: 2,
+                yAxisID: 'y1',
+                pointRadius: 4,
+                pointBackgroundColor: 'rgb(255, 193, 7)',
+                tension: 0.4,
+                fill: false
+              }
+            ]
+          };
+
+          console.log('✅ Graphique formaté (CFA):', {
+            labels: labels,
+            deliveriesData: deliveriesData,
+            revenueDataCFA: revenueData
+          });
+          
+          subscriber.next(chartData);
+          subscriber.complete();
+          
+        } catch (error) {
+          console.error('❌ Erreur lors du formatage:', error);
+          subscriber.next(this.getFallbackChartData());
           subscriber.complete();
         }
-      });
+      },
+      error: (error) => {
+        console.error('❌ Erreur API sales-over-time:', error);
+        subscriber.next(this.getFallbackChartData());
+        subscriber.complete();
+      }
     });
-  }
+  });
+}
+private getFallbackChartData(): ChartData {
+  const labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  
+  // Données exemple pour CFA
+  const deliveriesData = [12, 19, 8, 15, 22, 18, 14];
+  const revenueData = [3.2, 4.1, 2.8, 3.5, 4.8, 3.9, 3.2]; // en milliers de CFA
+  
+  return {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Livraisons (exemple)',
+        data: deliveriesData,
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderWidth: 2,
+        yAxisID: 'y',
+        pointRadius: 4,
+        pointBackgroundColor: 'rgb(59, 130, 246)',
+        tension: 0.4,
+        fill: false
+      },
+      {
+        label: 'Revenu (Mille FCFA) - Exemple',
+        data: revenueData,
+        borderColor: 'rgb(255, 193, 7)',
+        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+        borderWidth: 2,
+        yAxisID: 'y1',
+        pointRadius: 4,
+        pointBackgroundColor: 'rgb(255, 193, 7)',
+        tension: 0.4,
+        fill: false
+      }
+    ]
+  };
+}
 
   // NOUVELLE MÉTHODE : Charger toutes les données du dashboard en une fois
   getDashboardData(): Observable<{
@@ -304,36 +401,36 @@ export class StatsService {
   }
 
   // Méthode auxiliaire pour données vides
-  private getEmptyChartData(): ChartData {
-    return {
-      labels: ['Pas de données'],
-      datasets: [
-        {
-          label: 'Livraisons',
-          data: [0],
-          borderColor: 'rgb(200, 200, 200)',
-          backgroundColor: 'rgba(200, 200, 200, 0.1)',
-          borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: 'rgb(200, 200, 200)',
-          tension: 0.4,
-          fill: false
-        },
-        {
-          label: 'Revenu (Mille FCFA)',
-          data: [0],
-          borderColor: 'rgb(200, 200, 200)',
-          backgroundColor: 'rgba(200, 200, 200, 0.1)',
-          borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: 'rgb(200, 200, 200)',
-          yAxisID: 'y1',
-          tension: 0.4,
-          fill: false
-        }
-      ]
-    };
-  }
+ private getEmptyChartData(): ChartData {
+  return {
+    labels: ['Pas de données'],
+    datasets: [
+      {
+        label: 'Livraisons',
+        data: [0],
+        borderColor: 'rgb(200, 200, 200)',
+        backgroundColor: 'rgba(200, 200, 200, 0.1)',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: 'rgb(200, 200, 200)',
+        tension: 0.4,
+        fill: false
+      },
+      {
+        label: 'Revenu (Mille FCFA)',
+        data: [0],
+        borderColor: 'rgb(200, 200, 200)',
+        backgroundColor: 'rgba(200, 200, 200, 0.1)',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: 'rgb(200, 200, 200)',
+        yAxisID: 'y1',
+        tension: 0.4,
+        fill: false
+      }
+    ]
+  };
+}
 
   // Gestionnaire d'erreur générique
   private handleError<T>(error: any): Observable<ApiResponse<T>> {

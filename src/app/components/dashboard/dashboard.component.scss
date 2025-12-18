@@ -1,6 +1,6 @@
 .dashboard-container {
   padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff;
   min-height: 100vh;
 
   .dashboard-header {
@@ -12,14 +12,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid #e9ecef;
 
     .dashboard-title {
       font-size: 2rem;
       font-weight: 700;
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #1f2937;
       margin: 0;
     }
 
@@ -121,8 +119,7 @@
   border-radius: 20px;
   padding: 1.75rem;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
+  border: 1px solid #e9ecef;
   position: relative;
   overflow: hidden;
 
@@ -256,7 +253,7 @@
   padding: 2rem;
   margin-bottom: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #e9ecef;
 
   .section-header {
     display: flex;
@@ -502,7 +499,7 @@
   border-radius: 20px;
   padding: 1.5rem 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #e9ecef;
 
   .footer-stats {
     display: flex;
