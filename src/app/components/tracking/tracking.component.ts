@@ -7,7 +7,7 @@ import { GeolocationService } from '../../services/geolocation.service';
 import { Vehicle, VehicleStatus } from '../../models/vehicle.model';
 import { Subscription, interval } from 'rxjs';
 import * as L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+//import 'leaflet/dist/leaflet.css';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
