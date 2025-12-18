@@ -1,0 +1,424 @@
+<!-- components/delivery-persons/delivery-persons.component.html -->
+<div class="delivery-persons-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Gestion des Livreurs</h2>
+      <p class="subtitle">Gérez et suivez vos livreurs en temps réel</p>
+    </div>
+    <button 
+      *ngIf="canCreate" 
+      class="btn btn-primary"
+      (click)="openCreateModal()">
+      <i class="bi bi-plus-circle"></i>
+      Nouveau Livreur
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="card stat-card available">
+      <div class="icon-wrapper">
+        <i class="bi bi-person-check"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ getAvailableCount() }}</h3>
+        <p>Disponibles</p>
+      </div>
+    </div>
+    
+    <div class="card stat-card busy">
+      <div class="icon-wrapper">
+        <i class="bi bi-bicycle"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ getBusyCount() }}</h3>
+        <p>En livraison</p>
+      </div>
+    </div>
+    
+    <div class="card stat-card total">
+      <div class="icon-wrapper">
+        <i class="bi bi-people"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ drivers.length }}</h3>
+        <p>Total livreurs</p>
+      </div>
+    </div>
+    
+    <div class="card stat-card rating">
+      <div class="icon-wrapper">
+        <i class="bi bi-star"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ getAverageRating() }}</h3>
+        <p>Note moyenne</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="card filters-section">
+    <div class="filters-content">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input 
+          type="text" 
+          placeholder="Rechercher un livreur..."
+          [(ngModel)]="searchTerm"
+          (input)="filterDrivers()">
+      </div>
+      
+      <div class="filter-buttons">
+        <button 
+          class="filter-btn"
+          [class.active]="statusFilter === 'all'"
+          (click)="setStatusFilter('all')">
+          Tous
+        </button>
+        <button 
+          class="filter-btn"
+          [class.active]="statusFilter === 'available'"
+          (click)="setStatusFilter('available')">
+          <i class="bi bi-circle-fill available-dot"></i>
+          Disponibles
+        </button>
+        <button 
+          class="filter-btn"
+          [class.active]="statusFilter === 'busy'"
+          (click)="setStatusFilter('busy')">
+          <i class="bi bi-circle-fill busy-dot"></i>
+          Occupés
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drivers Table -->
+  <div class="card table-card">
+    <div class="table-header">
+      <h3>Liste des Livreurs</h3>
+      <span class="count-badge">{{ filteredDrivers.length }} livreur(s)</span>
+    </div>
+
+    <div class="table-container" *ngIf="!loading; else loadingTpl">
+      <table class="drivers-table">
+        <thead>
+          <tr>
+            <th>Livreur</th>
+            <th>Contact</th>
+            <th>Véhicule</th>
+            <th>Statut</th>
+            <th>Livraisons</th>
+            <th>Note</th>
+            <th *ngIf="canEdit || canDelete">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let driver of filteredDrivers" class="driver-row">
+            <!-- Nom et photo -->
+            <td>
+              <div class="driver-info">
+                <div class="driver-avatar">
+                  {{ getInitialsFromName(driver.name || '') }}
+                </div>
+                <div class="driver-details">
+                  <span class="driver-name">
+                    {{ driver.name }}
+                  </span>
+                  <span class="driver-id">#{{ driver.id }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Contact -->
+            <td>
+              <div class="contact-info">
+                <div class="contact-item">
+                  <i class="bi bi-envelope"></i>
+                  <span>{{ driver.email }}</span>
+                </div>
+                <div class="contact-item" *ngIf="driver.phone">
+                  <i class="bi bi-telephone"></i>
+                  <span>{{ driver.phone }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Véhicule -->
+            <td>
+              <div class="vehicle-info">
+                <i [class]="getVehicleIcon(driver.vehicleType || 'bike')"></i>
+                <span class="vehicle-type">{{ (driver.vehicleType || 'bike') | titlecase }}</span>
+                <span class="license-plate" *ngIf="driver.licensePlate">
+                  {{ driver.licensePlate }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Statut -->
+            <td>
+              <span class="status-badge" [class.available]="driver.isAvailable" [class.busy]="!driver.isAvailable">
+                <i class="bi bi-circle-fill"></i>
+                {{ driver.isAvailable ? 'Disponible' : 'Occupé' }}
+              </span>
+            </td>
+
+            <!-- Livraisons -->
+            <td>
+              <div class="delivery-stats">
+                <span class="stat-item active">
+                  <i class="bi bi-box"></i>
+                  {{ driver.activeDeliveries || 0 }}
+                </span>
+                <span class="stat-item total">
+                  Total: {{ driver.totalDeliveries || 0 }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Note -->
+            <td>
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <span class="rating-value">{{ driver.rating || 5.0 }}</span>
+                <span class="rating-max">/5</span>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td *ngIf="canEdit || canDelete">
+              <div class="action-buttons">
+                <button 
+                  *ngIf="canEdit"
+                  class="btn-icon btn-edit" 
+                  (click)="openEditModal(driver)"
+                  title="Modifier">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button 
+                  *ngIf="canDelete"
+                  class="btn-icon btn-delete" 
+                  (click)="deleteDriver(driver)"
+                  title="Supprimer">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="filteredDrivers.length === 0">
+        <i class="bi bi-inbox"></i>
+        <h3>Aucun livreur trouvé</h3>
+        <p>{{ searchTerm ? 'Aucun résultat pour votre recherche' : 'Commencez par ajouter un livreur' }}</p>
+        <button 
+          *ngIf="canCreate && !searchTerm" 
+          class="btn btn-primary"
+          (click)="openCreateModal()">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter un livreur
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Create/Edit -->
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i [class]="isEditMode ? 'bi bi-pencil-square' : 'bi bi-plus-circle'"></i>
+        {{ isEditMode ? 'Modifier' : 'Nouveau' }} Livreur
+      </h3>
+      <button class="btn-close" (click)="closeModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <form class="modal-body" #driverForm="ngForm" (ngSubmit)="onSubmit(driverForm)">
+      <!-- Informations personnelles -->
+      <div class="form-section">
+        <h4>Informations personnelles</h4>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">
+              <i class="bi bi-person"></i>
+              Prénom <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="firstName"
+              name="firstName"
+              [(ngModel)]="formData.firstName"
+              required
+              placeholder="Prénom du livreur">
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">
+              <i class="bi bi-person"></i>
+              Nom <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="lastName"
+              name="lastName"
+              [(ngModel)]="formData.lastName"
+              required
+              placeholder="Nom du livreur">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">
+              <i class="bi bi-envelope"></i>
+              Email <span class="required">*</span>
+            </label>
+            <input 
+              type="email" 
+              id="email"
+              name="email"
+              [(ngModel)]="formData.email"
+              required
+              email
+              placeholder="email@exemple.com">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">
+              <i class="bi bi-telephone"></i>
+              Téléphone <span class="required">*</span>
+            </label>
+            <input 
+              type="tel" 
+              id="phone"
+              name="phone"
+              [(ngModel)]="formData.phone"
+              required
+              placeholder="+237 6XX XXX XXX">
+          </div>
+        </div>
+
+        <!-- Mot de passe et adresse (seulement en mode création) -->
+        <div class="form-row" *ngIf="!isEditMode">
+          <div class="form-group">
+            <label for="password">
+              <i class="bi bi-lock"></i>
+              Mot de passe <span class="required">*</span>
+            </label>
+            <input 
+              type="password" 
+              id="password"
+              name="password"
+              [(ngModel)]="formData.password"
+              [required]="!isEditMode"
+              minlength="8"
+              placeholder="Minimum 8 caractères">
+          </div>
+
+          <div class="form-group">
+            <label for="address">
+              <i class="bi bi-geo-alt"></i>
+              Adresse
+            </label>
+            <input 
+              type="text" 
+              id="address"
+              name="address"
+              [(ngModel)]="formData.address"
+              placeholder="Adresse complète">
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations véhicule -->
+      <div class="form-section">
+        <h4>Informations véhicule</h4>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="vehicleType">
+              <i class="bi bi-truck"></i>
+              Type de véhicule <span class="required">*</span>
+            </label>
+            <select 
+              id="vehicleType"
+              name="vehicleType"
+              [(ngModel)]="formData.vehicleType"
+              required>
+              <option value="">Sélectionner un type</option>
+              <option value="bike">Vélo</option>
+              <option value="scooter">Scooter</option>
+              <option value="car">Voiture</option>
+              <option value="van">Camionnette</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="licensePlate">
+              <i class="bi bi-card-text"></i>
+              Plaque d'immatriculation
+            </label>
+            <input 
+              type="text" 
+              id="licensePlate"
+              name="licensePlate"
+              [(ngModel)]="formData.licensePlate"
+              placeholder="XX-1234-YY">
+          </div>
+        </div>
+      </div>
+
+      <!-- Statut -->
+      <div class="form-section">
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox"
+              name="isAvailable"
+              [(ngModel)]="formData.isAvailable">
+            <span class="checkbox-text">
+              <i class="bi bi-check-circle"></i>
+              Livreur disponible immédiatement
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="closeModal()">
+          <i class="bi bi-x-circle"></i>
+          Annuler
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="!driverForm.valid">
+          <i class="bi bi-check-circle"></i>
+          {{ isEditMode ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p>Chargement des livreurs...</p>
+  </div>
+</ng-template>
