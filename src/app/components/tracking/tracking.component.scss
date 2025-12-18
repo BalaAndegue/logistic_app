@@ -1,0 +1,193 @@
+/* tracking.component.scss */
+:host {
+    display: block;
+    padding: 20px;
+}
+
+#live-tracking-map {
+    height: 500px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    min-width: 150px;
+}
+
+.vehicles-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.vehicle-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    &.selected {
+        border-color: #007bff;
+        background-color: #f0f8ff;
+    }
+}
+
+.vehicle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.vehicle-type {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    
+    &.truck { background: #17a2b8; color: white; }
+    &.van { background: #28a745; color: white; }
+    &.motorcycle { background: #ffc107; color: #212529; }
+    &.car { background: #007bff; color: white; }
+}
+
+.vehicle-status {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    
+    &.available { background: #28a745; color: white; }
+    &.on_route { background: #007bff; color: white; }
+    &.delivering { background: #ffc107; color: #212529; }
+    &.returning { background: #6f42c1; color: white; }
+    &.maintenance { background: #dc3545; color: white; }
+}
+
+.vehicle-details {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.driver-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    
+    &.btn-primary {
+        background: #007bff;
+        color: white;
+        
+        &:hover {
+            background: #0056b3;
+        }
+    }
+    
+    &.btn-secondary {
+        background: #6c757d;
+        color: white;
+        
+        &:hover {
+            background: #545b62;
+        }
+    }
+}
+
+/* Styles pour les marqueurs de la carte */
+.vehicle-marker .marker-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.vehicle-marker.available .marker-icon {
+    background-color: #28a745;
+}
+
+.vehicle-marker.on_route .marker-icon {
+    background-color: #007bff;
+}
+
+.vehicle-marker.delivering .marker-icon {
+    background-color: #ffc107;
+}
+
+.vehicle-marker.returning .marker-icon {
+    background-color: #6f42c1;
+}
+
+.vehicle-marker.maintenance .marker-icon {
+    background-color: #dc3545;
+}
+
+.user-marker .user-icon {
+    font-size: 24px;
+    color: #17a2b8;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.error {
+    text-align: center;
+    padding: 40px;
+    color: #dc3545;
+}

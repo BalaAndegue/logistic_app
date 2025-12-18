@@ -24,7 +24,7 @@ export class UsersComponent implements OnInit {
     selectedRole = '';
     currentPage = 1;
     itemsPerPage = 10;
-    totalPages = 1;
+    totalPages = 10;
     totalItems = 0;
     showForm = false;
     selectedUser: User | null = null;

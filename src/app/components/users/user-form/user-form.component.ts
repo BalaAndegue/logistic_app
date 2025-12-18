@@ -18,7 +18,7 @@ export class UserFormComponent implements OnInit {
     @Output() cancel = new EventEmitter<void>();
 
     userForm: FormGroup;
-    roles: UserRole[] = ['ADMIN' , 'MANAGER' , 'SUPERVISOR' , 'USER'];
+    roles: UserRole[] = ['ADMIN' , 'MANAGER' , 'SUPERVISOR' , 'USER','DELIVERY'];
     loading = false;
 
     constructor(private fb: FormBuilder) {

@@ -1,0 +1,203 @@
+<!-- src/app/components/categories/category-form/category-form.component.html -->
+<div class="category-form">
+  <div class="container">
+    <!-- En-tête -->
+    <div class="form-header">
+      <h1 class="header-title">
+        <i class="bi bi-tag"></i>
+        {{ isEditMode ? 'Edit Category' : 'Create New Category' }}
+      </h1>
+      <p class="header-subtitle">
+        {{ isEditMode ? 'Update your category information' : 'Add a new category to organize your products' }}
+      </p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #categoryForm="ngForm">
+      <div class="form-card">
+        <div class="card-header">
+          <h3><i class="bi bi-info-circle"></i> Basic Information</h3>
+        </div>
+        
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">
+                Category Name <span class="required">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                [(ngModel)]="category.name" 
+                required 
+                class="form-control"
+                placeholder="e.g., Electronics, Clothing, Books"
+                maxlength="100">
+              <div class="form-text">
+                Enter a descriptive name for your category.
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="parent_id">Parent Category</label>
+              <select 
+                id="parent_id" 
+                name="parent_id" 
+                [(ngModel)]="category.parent_id" 
+                class="form-select">
+                <option value="">No Parent (Top Level)</option>
+                <option *ngFor="let parentCategory of categories" 
+                        [value]="parentCategory.id"
+                        [disabled]="parentCategory.id === categoryId">
+                  {{ parentCategory.name }}
+                </option>
+              </select>
+              <div class="form-text">
+                Select a parent category if this is a sub-category.
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea 
+              id="description" 
+              name="description" 
+              [(ngModel)]="category.description" 
+              class="form-control"
+              placeholder="Describe this category..."
+              rows="3"
+              maxlength="500"></textarea>
+            <div class="form-text">
+              Optional description for your category. Max 500 characters.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Upload -->
+      <div class="form-card mt-3">
+        <div class="card-header">
+          <h3><i class="bi bi-image"></i> Category Image</h3>
+        </div>
+        
+        <div class="card-body">
+          <div class="image-upload-section">
+            <div 
+              class="image-upload-area"
+              (click)="fileInput.click()"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($event)">
+              
+              <input 
+                type="file" 
+                #fileInput
+                (change)="onImageSelect($event)"
+                accept="image/*"
+                class="d-none">
+              
+              <i class="bi bi-cloud-arrow-up"></i>
+              
+              <div class="upload-text">
+                <span class="browse-link">Click to upload</span> or drag and drop
+              </div>
+              
+              <div class="upload-hint">
+                SVG, PNG, JPG or GIF (Max 2MB)
+              </div>
+            </div>
+            
+            <!-- Preview -->
+            <div *ngIf="imagePreview" class="image-preview">
+              <div class="preview-container">
+                <img [src]="imagePreview" [alt]="category.name">
+                <button 
+                  type="button" 
+                  class="remove-image"
+                  (click)="removeImage()">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+              <div class="form-text mt-2">
+                Click the image to change or X to remove.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="form-card mt-3">
+        <div class="card-header">
+          <h3><i class="bi bi-gear"></i> Settings</h3>
+        </div>
+        
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <div class="form-check form-switch">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  id="is_active"
+                  name="is_active"
+                  [(ngModel)]="category.is_active">
+                <label class="form-check-label" for="is_active">
+                  Active Status
+                </label>
+              </div>
+              <div class="form-text">
+                Inactive categories won't be visible to customers.
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="order">Display Order</label>
+              <input 
+                type="number" 
+                id="order" 
+                name="order" 
+                [(ngModel)]="category.order" 
+                class="form-control"
+                min="0"
+                step="1">
+              <div class="form-text">
+                Lower numbers appear first. Leave blank for default.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn btn-secondary"
+          routerLink="/categories">
+          <i class="bi bi-x-circle"></i>
+          Cancel
+        </button>
+        
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="isLoading || !categoryForm.form.valid">
+          <i *ngIf="!isLoading" class="bi bi-check-circle"></i>
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+          {{ isLoading ? 'Saving...' : (isEditMode ? 'Update Category' : 'Create Category') }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Overlay de chargement -->
+    <div *ngIf="isLoading" class="loading-overlay">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="loading-text">
+        {{ isEditMode ? 'Updating category...' : 'Creating category...' }}
+      </div>
+    </div>
+  </div>
+</div>

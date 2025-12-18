@@ -1,5 +1,5 @@
 // user.model.ts
-export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'USER';
+export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'USER' | 'DELIVERY' | 'VENDOR';
 
 export interface User {
     id: string;

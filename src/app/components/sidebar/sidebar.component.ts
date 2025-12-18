@@ -37,7 +37,7 @@ export class SidebarComponent {
     // 2. Add Supervisor-specific modules
     if (this.currentUser.role === 'SUPERVISOR') {
       this.menuItems.push(
-        { label: 'Live Tracking', icon: 'bi-map', route: '/supervisor/realtime' },
+        { label: 'Live Tracking', icon: 'bi-map', route: '/tracking' },
         //{ label: 'Validations', icon: 'bi-shield-check', route: '/supervisor/validation' },
         { label: 'Reports', icon: 'bi-graph-up', route: '/supervisor/reports' }
       );
@@ -57,8 +57,18 @@ export class SidebarComponent {
     if (this.currentUser.role === 'ADMIN') {
       this.menuItems.push(
         { label: 'Users', icon: 'bi-person-gear', route: '/users' },
-        { label: 'Settings', icon: 'bi-gear', route: '/settings' }
+        { label: 'Settings', icon: 'bi-gear', route: '/settings' },
+
       );
     }
+
+
+    // Add vendor specific menu
+  if (this.currentUser.role === 'VENDOR') {
+    this.menuItems.push(
+      { label: 'My Products', icon: 'bi-box', route: '/vendor/products' },
+      { label: 'My Categories', icon: 'bi-tags', route: '/vendor/categories' }
+    );
+  }
   }
 }
