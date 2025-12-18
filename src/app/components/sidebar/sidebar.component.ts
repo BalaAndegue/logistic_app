@@ -1,4 +1,3 @@
-
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -14,7 +13,6 @@ import { User } from '../../models/user.model';
 })
 export class SidebarComponent {
   currentUser: User | null = null;
-
   menuItems: any[] = [];
 
   constructor(private authService: AuthService) {
@@ -27,35 +25,35 @@ export class SidebarComponent {
   updateMenu() {
     if (!this.currentUser) return;
 
-    // Common items
-    const dashboard = { label: 'Dashboard', icon: 'bi-grid', route: '/dashboard' };
-    const tracking = { label: 'Live Tracking', icon: 'bi-map', route: '/tracking' };
-    const reports = { label: 'Reports', icon: 'bi-graph-up', route: '/reports' };
+    // 1. Set Dashboard path based on role
+    const dashboardRoute = this.currentUser.role === 'SUPERVISOR' 
+      ? '/supervisor/dashboard' 
+      : '/dashboard';
 
-    // Role specific
-    const restrictedReports = { ...reports, label: 'My Stats' }; // Example diff if needed
+    this.menuItems = [
+      { label: 'Dashboard', icon: 'bi-grid', route: dashboardRoute }
+    ];
 
-    this.menuItems = [dashboard];
-
-    if (this.currentUser.role === 'ADMIN' || this.currentUser.role === 'MANAGER') {
+    // 2. Add Supervisor-specific modules
+    if (this.currentUser.role === 'SUPERVISOR') {
       this.menuItems.push(
-        { label: 'Drivers', icon: 'bi-people', route: '/drivers' },
-        { label: 'Deliveries', icon: 'bi-box-seam', route: '/deliveries' }
+        { label: 'Live Tracking', icon: 'bi-map', route: '/supervisor/realtime' },
+        { label: 'Validations', icon: 'bi-shield-check', route: '/supervisor/validation' },
+        { label: 'Reports', icon: 'bi-graph-up', route: '/supervisor/reports' }
       );
     }
 
-    this.menuItems.push(tracking);
-
-    // Supervisor also validates proofs, maybe under tracking or separate? 
-    // Spec says: "Preuves de Livraison : Visualiser ... Valider". 
-    // Let's add a separate menu for Proofs/Validation if needed, or keep it inside Deliveries for context.
-    // For Supervisor specifically, they might want a direct list of "Pending Validation"
-    if (this.currentUser.role === 'SUPERVISOR') {
-      this.menuItems.push({ label: 'Validations', icon: 'bi-check-circle', route: '/validations' });
+    // 3. Admin & Manager Modules
+    if (this.currentUser.role === 'ADMIN' || this.currentUser.role === 'MANAGER') {
+      this.menuItems.push(
+        { label: 'Drivers', icon: 'bi-people', route: '/drivers' },
+        { label: 'Deliveries', icon: 'bi-box-seam', route: '/deliveries' },
+        { label: 'Live Tracking', icon: 'bi-map', route: '/tracking' },
+        { label: 'Reports', icon: 'bi-graph-up', route: '/reports' }
+      );
     }
 
-    this.menuItems.push(reports);
-
+    // 4. Admin Only
     if (this.currentUser.role === 'ADMIN') {
       this.menuItems.push(
         { label: 'Users', icon: 'bi-person-gear', route: '/users' },

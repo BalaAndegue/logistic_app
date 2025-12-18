@@ -1,0 +1,65 @@
+<div class="validation-container">
+  <div class="header-section mb-4">
+    <h2>Delivery Proof Validation</h2>
+    <p class="text-secondary">Inspect signatures and photos to confirm delivery completion.</p>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card p-0 overflow-hidden">
+        <div class="list-group list-group-flush">
+          <button *ngFor="let del of pendingDeliveries" 
+                  (click)="selectDelivery(del)"
+                  [class.active]="selectedDelivery?.id === del.id"
+                  class="list-group-item list-group-item-action border-0 p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-bold">{{ del.id }}</span>
+              <span class="badge rounded-pill bg-warning text-dark" style="font-size: 0.7rem;">Pending</span>
+            </div>
+            <div class="small text-muted mt-1">{{ del.client }}</div>
+            <div class="small text-secondary">{{ del.driver }}</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card shadow-sm" *ngIf="selectedDelivery; else emptyState">
+        <h3 class="mb-4">Details for {{ selectedDelivery.id }}</h3>
+        
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label text-secondary small fw-bold">SIGNATURE</label>
+            <div class="proof-box">
+              <img *ngIf="selectedDelivery.proofs.signature" [src]="selectedDelivery.proofs.signature" alt="Signature">
+              <div *ngIf="!selectedDelivery.proofs.signature" class="text-danger">No signature</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-secondary small fw-bold">PHOTO PROOF</label>
+            <div class="proof-box">
+              <img [src]="selectedDelivery.proofs.photo" alt="Delivery Photo">
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex gap-3">
+          <button class="btn btn-primary px-4" (click)="validateDelivery(selectedDelivery.id)">
+            <i class="bi bi-check2-circle me-2"></i> Confirm Validation
+          </button>
+          <button class="btn btn-outline px-4">
+            <i class="bi bi-x-circle me-2"></i> Flag as Incorrect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #emptyState>
+  <div class="card text-center py-5 border-dashed">
+    <i class="bi bi-clipboard-check display-1 text-light mb-3"></i>
+    <h4 class="text-secondary">Ready to Validate</h4>
+    <p class="text-muted">Select a delivery from the left to review its proofs.</p>
+  </div>
+</ng-template>

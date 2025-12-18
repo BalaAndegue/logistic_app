@@ -1,0 +1,10 @@
+.realtime-container {
+    h2 { margin-bottom: 0.5rem; }
+    .header-section { margin-bottom: 2rem; }
+}
+
+.map-card {
+    padding: 0; // Let the map fill the card radius
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}

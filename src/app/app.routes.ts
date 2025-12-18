@@ -5,10 +5,21 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { UsersComponent } from './components/users/users.component';
 import { authGuard } from './guards/auth.guard';
 import { SupervisorDashboardComponent } from './components/supervisor/supervisor-dashboard.component';
+import { SupervisorRealtimeComponent } from './components/supervisor/supervisor-realtime/supervisor-realtime.component';
+import { ValidationComponent } from './components/supervisor/validation/validation.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
-    { path: 'test-supervisor', component: SupervisorDashboardComponent },
+    // Inside your app.routes.ts children array:
+    { 
+    path: 'supervisor', 
+    children: [
+        { path: 'dashboard', component: SupervisorDashboardComponent },
+        { path: 'realtime', component: SupervisorRealtimeComponent }, // Next step
+        { path: 'validation', component: ValidationComponent }, // Next step
+        //{ path: 'reports', component: SupervisorReportsComponent }
+    ]
+    },
     {
         path: '',
         component: MainLayoutComponent,
