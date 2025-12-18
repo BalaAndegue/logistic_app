@@ -7,6 +7,7 @@ import { authGuard } from './guards/auth.guard';
 import { SupervisorDashboardComponent } from './components/supervisor/supervisor-dashboard.component';
 import { SupervisorRealtimeComponent } from './components/supervisor/supervisor-realtime/supervisor-realtime.component';
 import { ValidationComponent } from './components/supervisor/validation/validation.component';
+import { ReportsComponent } from './components/supervisor/reports/reports.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -17,7 +18,7 @@ export const routes: Routes = [
         { path: 'dashboard', component: SupervisorDashboardComponent },
         { path: 'realtime', component: SupervisorRealtimeComponent }, // Next step
         { path: 'validation', component: ValidationComponent }, // Next step
-        //{ path: 'reports', component: SupervisorReportsComponent }
+        { path: 'reports', component: ReportsComponent }
     ]
     },
     {
