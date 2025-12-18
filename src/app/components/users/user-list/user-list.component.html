@@ -1,0 +1,49 @@
+<!-- src/app/components/users/user-list/user-list.component.html -->
+<div class="user-list">
+    <div class="table-responsive" *ngIf="!loading; else loadingTemplate">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of users">
+                    <td data-label="Name">{{ user.name }}</td>
+                    <td data-label="Email">{{ user.email }}</td>
+                    <td data-label="Role">
+                        <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
+                            {{ getRoleLabel(user.role) }}
+                        </span>
+                    </td>
+                    <td data-label="Phone">{{ user.phone || 'N/A' }}</td>
+                    <td data-label="Actions">
+                        <button class="btn btn-info" (click)="edit.emit(user)" >
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" (click)="delete.emit(user.id)" >
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div *ngIf="users.length === 0" class="empty-state">
+            <i class="bi bi-people"></i>
+            <h4>No Users Found</h4>
+            <p>Try adjusting your search or add a new user</p>
+        </div>
+    </div>
+
+    <ng-template #loadingTemplate>
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading users...</p>
+        </div>
+    </ng-template>
+</div>

@@ -8,13 +8,13 @@
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="email">email</label>
         <div class="input-wrapper">
           <i class="bi bi-person"></i>
           <input type="text" id="username" formControlName="username" class="form-control" placeholder="admin, manager, or supervisor" />
         </div>
         <div *ngIf="f['username'].touched && f['username'].errors" class="invalid-feedback">
-          Username is required
+          email is required
         </div>
       </div>
 
