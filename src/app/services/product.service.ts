@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Product, ProductFilters, ProductStats } from '../models/product.model';
 import { ProductVariant } from '../models/product-variant.model';
 import { API_CONFIG } from './api/api-config';
@@ -25,54 +25,75 @@ export class ProductService {
       });
     }
     
-    return this.http.get<Product[]>(this.apiUrl, { params });
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
+      map(response => response.data || response)
+    );
   }
 
   getFeatured(): Observable<Product[]> {
-    return this.http.get<Product[]>(`${this.apiUrl}/featured`);
+    return this.http.get<any>(`${this.apiUrl}/featured`).pipe(
+      map(response => response.data || response)
+    );
   }
 
   getBySlug(slug: string): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${slug}`);
+    return this.http.get<any>(`${this.apiUrl}/${slug}`).pipe(
+      map(response => response.data || response)
+    );
   }
 
   getById(id: number): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map(response => response.data || response)
+    );
   }
 
   getMyProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(`${this.apiUrl}/vendor/my-products`);
+    return this.http.get<any>(`${this.apiUrl}/vendor/my-products`).pipe(
+      map(response => response.data || response)
+    );
   }
 
   getStats(): Observable<ProductStats> {
-    return this.http.get<ProductStats>(`${this.apiUrl}/vendor/stats`);
+    return this.http.get<any>(`${this.apiUrl}/vendor/stats`).pipe(
+      map(response => response.data || response)
+    );
   }
 
   create(product: FormData): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, product);
+    return this.http.post<any>(this.apiUrl, product).pipe(
+      map(response => response.data || response)
+    );
   }
 
   update(id: number, product: FormData): Observable<Product> {
     product.append('_method', 'PUT');
-    return this.http.post<Product>(`${this.apiUrl}/${id}`, product);
+    return this.http.post<any>(`${this.apiUrl}/${id}`, product).pipe(
+      map(response => response.data || response)
+    );
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // Variants management
   getVariants(productId: number): Observable<ProductVariant[]> {
-    return this.http.get<ProductVariant[]>(`${this.apiUrl}/${productId}/variants`);
+    return this.http.get<any>(`${this.apiUrl}/${productId}/variants`).pipe(
+      map(response => response.data || response)
+    );
   }
 
   createVariant(productId: number, variant: FormData): Observable<ProductVariant> {
-    return this.http.post<ProductVariant>(`${this.apiUrl}/${productId}/variants`, variant);
+    return this.http.post<any>(`${this.apiUrl}/${productId}/variants`, variant).pipe(
+      map(response => response.data || response)
+    );
   }
 
   updateVariant(variantId: number, variant: FormData): Observable<ProductVariant> {
     variant.append('_method', 'PUT');
-    return this.http.post<ProductVariant>(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.variants}/${variantId}`, variant);
+    return this.http.post<any>(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.variants}/${variantId}`, variant).pipe(
+      map(response => response.data || response)
+    );
   }
 
   deleteVariant(variantId: number): Observable<void> {

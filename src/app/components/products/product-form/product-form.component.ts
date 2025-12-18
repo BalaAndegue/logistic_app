@@ -116,7 +116,8 @@ export class ProductFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.product.name || !this.product.category_id || (this.product.price ?? 0) <= 0) {
+    const price = Number(this.product.price ?? 0);
+    if (!this.product.name || !this.product.category_id || price <= 0) {
       alert('Please fill in all required fields');
       return;
     }

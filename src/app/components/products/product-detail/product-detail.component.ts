@@ -53,7 +53,7 @@ export class ProductDetailComponent implements OnInit {
 
   getMainImage(): string {
     if (!this.product?.images || this.product.images.length === 0) {
-      return 'assets/images/placeholder-product.jpg';
+      return 'https://i.pinimg.com/736x/6d/f6/84/6df684f8427dd671088a474ac9d8de93.jpg';
     }
     
     const image = this.product.images[this.selectedImageIndex];
@@ -66,7 +66,7 @@ export class ProductDetailComponent implements OnInit {
     } else if (image instanceof File) {
       return URL.createObjectURL(image);
     }
-    return 'assets/images/placeholder-thumb.jpg';
+    return 'https://i.pinimg.com/736x/6d/f6/84/6df684f8427dd671088a474ac9d8de93.jpg';
   }
 
   objectKeys(obj: any): string[] {

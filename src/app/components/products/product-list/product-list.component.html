@@ -1,6 +1,6 @@
 <div class="product-list">
   <div class="container">
-    <!-- En-tête -->
+    <!-- Header -->
     <div class="header">
       <h1 class="title">
         <i class="bi bi-box"></i>
@@ -36,27 +36,7 @@
       </div>
     </div>
 
-    <!-- Statistiques (pour la vue vendeur) -->
-    <div *ngIf="isVendorView && stats" class="stats-bar">
-      <div class="stat-card stat-total">
-        <div class="stat-value">{{ stats.total_products || 0 }}</div>
-        <div class="stat-label">Total Products</div>
-      </div>
-      <div class="stat-card stat-active">
-        <div class="stat-value">{{ stats.active_products || 0 }}</div>
-        <div class="stat-label">Active</div>
-      </div>
-      <div class="stat-card stat-out-of-stock">
-        <div class="stat-value">{{ stats.out_of_stock || 0 }}</div>
-        <div class="stat-label">Out of Stock</div>
-      </div>
-      <div class="stat-card stat-value">
-        <div class="stat-value">${{ stats.total_value || 0 | number:'1.2-2' }}</div>
-        <div class="stat-label">Total Value</div>
-      </div>
-    </div>
-
-    <!-- Filtres -->
+    <!-- Filters Section -->
     <div *ngIf="showFilters" class="filters">
       <div class="filter-row">
         <div class="filter-group">
@@ -66,14 +46,16 @@
             id="search" 
             [(ngModel)]="filters.search"
             placeholder="Product name, SKU, description..."
-            (keyup.enter)="applyFilters()">
+            (keyup.enter)="applyFilters()"
+            class="form-control">
         </div>
         
         <div class="filter-group">
           <label for="category_id">Category</label>
           <select 
             id="category_id" 
-            [(ngModel)]="filters.category_id">
+            [(ngModel)]="filters.category_id"
+            class="form-select">
             <option value="">All Categories</option>
             <option *ngFor="let category of categories" [value]="category.id">
               {{ category.name }}
@@ -85,46 +67,51 @@
           <label for="is_featured">Featured</label>
           <select 
             id="is_featured" 
-            [(ngModel)]="filters.is_featured">
+            [(ngModel)]="filters.is_featured"
+            class="form-select">
             <option value="">All</option>
             <option [value]="true">Featured Only</option>
             <option [value]="false">Not Featured</option>
           </select>
-        </div>
-      </div>
-      
-      <div class="filter-row">
-        <div class="filter-group">
-          <label for="min_price">Min Price</label>
-          <input 
-            type="number" 
-            id="min_price" 
-            [(ngModel)]="filters.min_price"
-            placeholder="0"
-            min="0"
-            step="0.01">
-        </div>
-        
-        <div class="filter-group">
-          <label for="max_price">Max Price</label>
-          <input 
-            type="number" 
-            id="max_price" 
-            [(ngModel)]="filters.max_price"
-            placeholder="Any"
-            min="0"
-            step="0.01">
         </div>
         
         <div class="filter-group">
           <label for="sort_by">Sort By</label>
           <select 
             id="sort_by" 
-            [(ngModel)]="filters.sort_by">
-            <option value="created_at">Newest</option>
-            <option value="name">Name A-Z</option>
-            <option value="price">Price Low to High</option>
-            <option value="price_desc">Price High to Low</option>
+            [(ngModel)]="filters.sort_by"
+            class="form-select">
+            <option value="">Default</option>
+            <option value="name">Name</option>
+            <option value="price">Price</option>
+            <option value="created_at">Date Added</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="filter-row" *ngIf="isVendorView">
+        <div class="filter-group">
+          <label for="is_active">Status</label>
+          <select 
+            id="is_active" 
+            [(ngModel)]="filters.is_active"
+            class="form-select">
+            <option value="">All Status</option>
+            <option [value]="true">Active</option>
+            <option [value]="false">Inactive</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="stock_status">Stock Status</label>
+          <select 
+            id="stock_status" 
+            [(ngModel)]="filters.stock_status"
+            class="form-select">
+            <option value="">All</option>
+            <option value="in_stock">In Stock</option>
+            <option value="out_of_stock">Out of Stock</option>
+            <option value="low_stock">Low Stock</option>
           </select>
         </div>
       </div>
@@ -145,7 +132,27 @@
       </div>
     </div>
 
-    <!-- État de chargement -->
+    <!-- Vendor Stats Bar -->
+    <div *ngIf="isVendorView && stats" class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-label">Total Products</div>
+        <div class="stat-value">{{ stats.total_products || 0 }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Active Products</div>
+        <div class="stat-value">{{ stats.active_products || 0 }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Out of Stock</div>
+        <div class="stat-value">{{ stats.out_of_stock || 0 }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Total Value</div>
+        <div class="stat-value">${{ stats.total_value || 0 | number:'1.2-2' }}</div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
     <div *ngIf="isLoading" class="loading">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -153,8 +160,8 @@
       <p>Loading products...</p>
     </div>
 
-    <!-- Erreur -->
-    <div *ngIf="error && !isLoading" class="error">
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="error alert alert-danger">
       <i class="bi bi-exclamation-triangle"></i>
       {{ error }}
       <button class="btn btn-sm btn-outline-primary ms-2" (click)="loadProducts()">
@@ -162,7 +169,7 @@
       </button>
     </div>
 
-    <!-- État vide -->
+    <!-- Empty State -->
     <div *ngIf="!isLoading && !error && products.length === 0" class="empty-state">
       <i class="bi bi-box"></i>
       <h3>No Products Found</h3>
@@ -175,9 +182,9 @@
       </button>
     </div>
 
-    <!-- Grille de produits -->
+    <!-- Products Grid -->
     <div *ngIf="!isLoading && !error && products.length > 0" class="products-grid">
-      <div *ngFor="let product of products" class="product-card">
+      <div *ngFor="let product of products" class="product-card card">
         <div class="card-header">
           <img 
             [src]="getProductImage(product)" 
@@ -192,54 +199,50 @@
             <span *ngIf="!product.is_active" class="badge inactive">
               <i class="bi bi-eye-slash"></i> Inactive
             </span>
-            <span *ngIf="product.quantity === 0" class="badge out-of-stock">
+            <span *ngIf="getQuantity(product) === 0" class="badge out-of-stock">
               <i class="bi bi-x-circle"></i> Out of Stock
             </span>
-            <span *ngIf="product.quantity > 0 && product.quantity <= 10" class="badge low-stock">
+            <span *ngIf="getQuantity(product) > 0 && getQuantity(product) <= 10" class="badge low-stock">
               <i class="bi bi-exclamation-triangle"></i> Low Stock
             </span>
           </div>
         </div>
         
         <div class="card-body">
-          <h3 class="product-title">
+          <h5 class="product-title">
             <a [routerLink]="['/products', product.slug || product.id]" class="text-decoration-none">
               {{ product.name }}
             </a>
-          </h3>
+          </h5>
           
-          <span class="product-category">
+          <div class="product-category" *ngIf="product.category">
             <i class="bi bi-tag"></i>
-            {{ product.category?.name || 'Uncategorized' }}
-          </span>
+            {{ product.category.name || 'Uncategorized' }}
+          </div>
           
-          <p class="product-description" *ngIf="product.short_description">
-            {{ product.short_description }}
+          <p class="product-description" *ngIf="product.description">
+            {{ (product.description || '') | slice:0:100 }}...
           </p>
           
           <div class="product-price">
-            ${{ product.price | number:'1.2-2' }}
+            <span class="current-price">XAF {{ getPrice(product) | number:'1.2-2' }}</span>
             <span *ngIf="product.compare_price" class="compare-price">
-              ${{ product.compare_price | number:'1.2-2' }}
+              XAF {{ product.compare_price | number:'1.2-2' }}
             </span>
           </div>
           
           <div class="product-stock">
-            <span class="stock-status" [class]="product.quantity > 0 ? 'in-stock' : 'out-of-stock'">
-              <i [class]="product.quantity > 0 ? 'bi bi-check-circle' : 'bi bi-x-circle'"></i>
-              {{ product.quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+            <span class="stock-status" [class]="isInStock(product) ? 'in-stock' : 'out-of-stock'">
+              <i [class]="isInStock(product) ? 'bi bi-check-circle' : 'bi bi-x-circle'"></i>
+              {{ isInStock(product) ? 'In Stock' : 'Out of Stock' }}
             </span>
             <span class="quantity">
-              {{ product.quantity }} units
+              {{ getQuantity(product) }} units
             </span>
           </div>
         </div>
         
         <div class="card-footer">
-          <div class="product-sku" *ngIf="product.sku">
-            <small class="text-muted">SKU: {{ product.sku }}</small>
-          </div>
-          
           <div class="actions">
             <button 
               class="btn btn-sm btn-outline-primary"
@@ -275,29 +278,32 @@
 
     <!-- Pagination -->
     <div *ngIf="!isLoading && !error && products.length > 0 && totalPages > 1" class="pagination">
-      <nav aria-label="Product pagination">
+      <nav>
         <ul class="pagination">
           <li class="page-item" [class.disabled]="currentPage === 1">
-            <a class="page-link" (click)="goToPage(currentPage - 1)" href="javascript:void(0)">
-              Previous
+            <a class="page-link" (click)="goToPage(currentPage - 1)">
+              <i class="bi bi-chevron-left"></i>
             </a>
           </li>
           
           <li *ngFor="let page of getPaginationPages()" 
               class="page-item" 
               [class.active]="page === currentPage">
-            <a class="page-link" (click)="goToPage(page)" href="javascript:void(0)">
+            <a class="page-link" (click)="goToPage(page)">
               {{ page }}
             </a>
           </li>
           
           <li class="page-item" [class.disabled]="currentPage === totalPages">
-            <a class="page-link" (click)="goToPage(currentPage + 1)" href="javascript:void(0)">
-              Next
+            <a class="page-link" (click)="goToPage(currentPage + 1)">
+              <i class="bi bi-chevron-right"></i>
             </a>
           </li>
         </ul>
       </nav>
+      <div class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages }}
+      </div>
     </div>
   </div>
 </div>
