@@ -20,10 +20,10 @@ export class UsersService {
     }
 
     // Récupérer tous les utilisateurs avec pagination/filtrage
-    getUsers(page = 1, limit = 20, search = '', role = ''): Observable<{data: User[], meta: any}> {
+    getUsers(page = 10, limit = 20, search = '', role = ''): Observable<{data: User[], meta: any}> {
         let params = new HttpParams()
             .set('limit', limit.toString())
-            .set('per_page', page.toString());
+            .set('per_page',"10");
             
 
         if (search) params = params.set('search', search);

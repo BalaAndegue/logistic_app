@@ -22,6 +22,7 @@ export class UserListComponent {
             case 'admin': return 'badge-danger';
             case 'manager': return 'badge-warning';
             case 'supervisor': return 'badge-info';
+            case 'delivery' :return 'badge-secondary'
             default: return 'badge-secondary';
         }
     }
