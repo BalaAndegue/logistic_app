@@ -1,0 +1,94 @@
+<!-- tracking.component.html -->
+<div class="tracking-container">
+    <!-- En-tête avec statistiques -->
+    <div class="stats-grid">
+        <div *ngFor="let stat of stats | keyvalue" class="stat-card">
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ getStatLabel(stat.key) }}</div>
+        </div>
+    </div>
+    
+    <!-- Carte -->
+    <div id="live-tracking-map"></div>
+    
+    <!-- Filtres -->
+    <div class="filters">
+        <input [(ngModel)]="searchQuery" 
+               (ngModelChange)="applyFilters()"
+               placeholder="Rechercher..."
+               class="form-control">
+        
+        <select [(ngModel)]="statusFilter" 
+                (ngModelChange)="applyFilters()"
+                class="form-control">
+            <option value="all">Tous les statuts</option>
+            <option value="available">Disponible</option>
+            <option value="on_route">En route</option>
+            <option value="delivering">En livraison</option>
+            <option value="returning">Retour</option>
+            <option value="maintenance">Maintenance</option>
+        </select>
+        
+        <select [(ngModel)]="typeFilter" 
+                (ngModelChange)="applyFilters()"
+                class="form-control">
+            <option value="all">Tous les types</option>
+            <option value="truck">Camion</option>
+            <option value="van">Fourgon</option>
+            <option value="motorcycle">Moto</option>
+            <option value="car">Voiture</option>
+        </select>
+        
+        <button (click)="toggleUserTracking()" 
+                class="btn" 
+                [class.btn-primary]="!trackingUser"
+                [class.btn-secondary]="trackingUser">
+            {{ trackingUser ? 'Arrêter suivi' : 'Suivre ma position' }}
+        </button>
+    </div>
+    
+    <!-- Liste des véhicules -->
+    <div *ngIf="loading" class="loading">
+        Chargement des véhicules...
+    </div>
+    
+    <div *ngIf="!loading" class="vehicles-list">
+        <div *ngFor="let vehicle of filteredVehicles" 
+             class="vehicle-card"
+             [class.selected]="selectedVehicle?.id === vehicle.id"
+             (click)="onSelectVehicle(vehicle)">
+            
+            <div class="vehicle-header">
+                <div>
+                    <strong>{{ vehicle.licensePlate }}</strong>
+                    <div class="vehicle-type" [class]="vehicle.type">
+                        {{ getTypeLabel(vehicle.type) }}
+                    </div>
+                </div>
+                <div class="vehicle-status" [class]="vehicle.status">
+                    {{ getStatusLabel(vehicle.status) }}
+                </div>
+            </div>
+            
+            <div class="driver-info">
+                <div>👤 {{ vehicle.driverName }}</div>
+                <div>📞 {{ vehicle.driverPhone }}</div>
+            </div>
+            
+            <div class="vehicle-details">
+                <div>📍 {{ vehicle.currentLocation.address }}</div>
+                <div>⚡ {{ vehicle.speed }} km/h</div>
+                <div *ngIf="vehicle.battery !== null">🔋 {{ vehicle.battery }}%</div>
+                <div *ngIf="vehicle.temperature !== null">🌡️ {{ vehicle.temperature }}°C</div>
+                <small>Mise à jour: {{ now | date:'HH:mm:ss' }}</small>
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <button (click)="sendAlert(vehicle.id); $event.stopPropagation()"
+                        class="btn btn-secondary">
+                    Envoyer alerte
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
