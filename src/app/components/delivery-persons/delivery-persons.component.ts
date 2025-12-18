@@ -1,10 +1,3 @@
-// services/delivery-person.services.ts
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-
-// components/delivery-persons/delivery-persons.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,24 +20,23 @@ export class DeliveryPersonsComponent implements OnInit {
   isEditMode = false;
   loading = true;
 
+  
   formData: any = {
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     phone: '',
-    password: 'Password123!',
-    address: '',
-    vehicleType: 'bike',
-    licensePlate: '',
-    isAvailable: true
+    role: 'DELIVERY',
+    password: '',
+    password_confirmation: '',
+    address: ''
   };
 
   searchTerm = '';
   statusFilter: 'all' | 'available' | 'busy' = 'all';
 
-  canCreate = false;
-  canEdit = false;
-  canDelete = false;
+  canCreate = true;
+  canEdit = true;
+  canDelete = true;
 
   constructor(
     private deliveryPersonService: DeliveryPersonsService,
@@ -66,14 +58,15 @@ export class DeliveryPersonsComponent implements OnInit {
   loadDrivers(): void {
     this.loading = true;
     this.deliveryPersonService.getAll().subscribe({
-      next: (drivers) => {
-        console.log('✅ Livreurs chargés:', drivers);
-        this.drivers = drivers;
+      next: (response: any) => {
+        console.log('Réponse API:', response);
+        
+        this.drivers = Array.isArray(response.data) ? response.data : (Array.isArray(response) ? response : []);
         this.filterDrivers();
         this.loading = false;
       },
       error: (error) => {
-        console.error('❌ Erreur chargement:', error);
+        console.error('Erreur chargement:', error);
         this.loading = false;
         alert('Erreur lors du chargement des livreurs');
       }
@@ -84,12 +77,11 @@ export class DeliveryPersonsComponent implements OnInit {
     this.filteredDrivers = this.drivers.filter(driver => {
       const matchSearch = this.searchTerm === '' || 
         driver.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        driver.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        driver.email?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         driver.phone?.includes(this.searchTerm);
 
-      const matchStatus = this.statusFilter === 'all' ||
-        (this.statusFilter === 'available' && driver.isAvailable) ||
-        (this.statusFilter === 'busy' && !driver.isAvailable);
+      
+      const matchStatus = this.statusFilter === 'all';
 
       return matchSearch && matchStatus;
     });
@@ -114,16 +106,18 @@ export class DeliveryPersonsComponent implements OnInit {
     
     this.isEditMode = true;
     this.selectedDriver = { ...driver };
+    
+    
     this.formData = {
-      firstName: driver.firstName || '',
-      lastName: driver.lastName || '',
-      email: driver.email,
-      phone: driver.phone,
-      address: driver.address,
-      vehicleType: driver.vehicleType || 'bike',
-      licensePlate: driver.licensePlate || '',
-      isAvailable: driver.isAvailable
+      name: driver.name || '',
+      email: driver.email || '',
+      phone: driver.phone || '',
+      role: driver.role || 'DELIVERY',
+      address: driver.address || '',
+      password: '',
+      password_confirmation: ''
     };
+    
     this.isModalOpen = true;
   }
 
@@ -133,34 +127,76 @@ export class DeliveryPersonsComponent implements OnInit {
       return;
     }
 
+   
+    const payload: any = {
+      name: this.formData.name.trim(),
+      email: this.formData.email.trim(),
+      role: 'DELIVERY',
+      phone: this.formData.phone?.trim() || '',
+      address: this.formData.address?.trim() || ''
+    };
+
     if (this.isEditMode && this.selectedDriver && this.selectedDriver.id) {
-      // Mise à jour
-      this.deliveryPersonService.update(this.selectedDriver.id, this.formData)
+     
+      if (this.formData.password && this.formData.password.trim() !== '') {
+        if (this.formData.password !== this.formData.password_confirmation) {
+          alert('Les mots de passe ne correspondent pas');
+          return;
+        }
+        payload.password = this.formData.password;
+        payload.password_confirmation = this.formData.password_confirmation;
+      }
+
+      console.log('Payload UPDATE:', payload);
+
+      this.deliveryPersonService.update(this.selectedDriver.id, payload)
         .subscribe({
-          next: () => {
-            console.log('✅ Livreur modifié');
+          next: (response) => {
+            console.log('Livreur modifié:', response);
             this.loadDrivers();
             this.closeModal();
             alert('Livreur modifié avec succès !');
           },
           error: (err) => {
-            console.error('❌ Erreur update:', err);
-            alert('Erreur lors de la modification: ' + (err.error?.message || 'Erreur inconnue'));
+            console.error('Erreur update:', err);
+            const errorMsg = err.error?.message || err.error?.error || JSON.stringify(err.error) || 'Erreur inconnue';
+            alert('Erreur lors de la modification:\n' + errorMsg);
           }
         });
     } else {
-      // Création
-      this.deliveryPersonService.create(this.formData)
+     
+      if (!this.formData.password || this.formData.password.trim() === '') {
+        alert('Le mot de passe est obligatoire pour créer un livreur');
+        return;
+      }
+
+      if (this.formData.password !== this.formData.password_confirmation) {
+        alert('Les mots de passe ne correspondent pas');
+        return;
+      }
+
+      if (this.formData.password.length < 8) {
+        alert('Le mot de passe doit contenir au moins 8 caractères');
+        return;
+      }
+
+      payload.password = this.formData.password;
+      payload.password_confirmation = this.formData.password_confirmation;
+
+      console.log('Payload CREATE:', payload);
+
+      this.deliveryPersonService.create(payload)
         .subscribe({
-          next: () => {
-            console.log('✅ Livreur créé');
+          next: (response) => {
+            console.log('Livreur créé:', response);
             this.loadDrivers();
             this.closeModal();
             alert('Livreur créé avec succès !');
           },
           error: (err) => {
-            console.error('❌ Erreur create:', err);
-            alert('Erreur lors de la création: ' + (err.error?.message || 'Erreur inconnue'));
+            console.error('Erreur create:', err);
+            const errorMsg = err.error?.message || err.error?.error || JSON.stringify(err.error) || 'Erreur inconnue';
+            alert('Erreur lors de la création:\n' + errorMsg);
           }
         });
     }
@@ -169,17 +205,18 @@ export class DeliveryPersonsComponent implements OnInit {
   deleteDriver(driver: DeliveryPerson): void {
     if (!this.canDelete || !driver.id) return;
     
-    if (confirm(`Êtes-vous sûr de vouloir supprimer ${driver.name} ?`)) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer ${driver.name} ?\n\nCette action est irréversible.`)) {
       this.deliveryPersonService.delete(driver.id)
         .subscribe({
-          next: () => {
-            console.log('✅ Livreur supprimé');
+          next: (response) => { 
+            console.log('Livreur supprimé:', response);
             this.loadDrivers();
             alert('Livreur supprimé avec succès !');
           },
           error: (err) => {
-            console.error('❌ Erreur delete:', err);
-            alert('Erreur lors de la suppression');
+            console.error('Erreur delete:', err);
+            const errorMsg = err.error?.message || err.error?.error || JSON.stringify(err.error) || 'Erreur inconnue';
+            alert('Erreur lors de la suppression:\n' + errorMsg);
           }
         });
     }
@@ -193,20 +230,19 @@ export class DeliveryPersonsComponent implements OnInit {
 
   resetForm(): void {
     this.formData = {
-      firstName: '',
-      lastName: '',
+      name: '',
       email: '',
       phone: '',
-      password: 'Password123!',
-      address: '',
-      vehicleType: 'bike',
-      licensePlate: '',
-      isAvailable: true
+      role: 'DELIVERY',
+      password: '',
+      password_confirmation: '',
+      address: ''
     };
   }
 
+  
   getInitialsFromName(fullName: string): string {
-    if (!fullName) return 'NN';
+    if (!fullName || fullName.trim() === '') return 'NN';
     
     const parts = fullName.trim().split(' ');
     
@@ -228,16 +264,14 @@ export class DeliveryPersonsComponent implements OnInit {
   }
 
   getAvailableCount(): number {
-    return this.drivers.filter(d => d.isAvailable).length;
+    return 0;
   }
 
   getBusyCount(): number {
-    return this.drivers.filter(d => !d.isAvailable).length;
+    return 0;
   }
 
   getAverageRating(): string {
-    if (this.drivers.length === 0) return '0.0';
-    const sum = this.drivers.reduce((acc, driver) => acc + (driver.rating || 0), 0);
-    return (sum / this.drivers.length).toFixed(1);
+    return '5.0';
   }
 }

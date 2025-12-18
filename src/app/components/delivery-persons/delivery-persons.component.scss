@@ -1,9 +1,7 @@
-// components/delivery-persons/delivery-persons.component.scss
 
 .delivery-persons-container {
   padding: 2rem;
 
-  // Page Header
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -49,7 +47,6 @@
     }
   }
 
-  // Stats Grid
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

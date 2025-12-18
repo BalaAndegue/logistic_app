@@ -8,10 +8,10 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   
-  // ✅ Récupération des rôles requis depuis la route
+  // Récupération des rôles requis depuis la route
   const requiredRoles = route.data['roles'] as UserRole[];
   
-  // ✅ Vérification si l'utilisateur a l'un des rôles requis
+  // Vérification si l'utilisateur a l'un des rôles requis
   if (requiredRoles && requiredRoles.length > 0) {
     const hasAccess = authService.hasRole(requiredRoles);
     
