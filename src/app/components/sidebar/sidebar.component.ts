@@ -27,7 +27,7 @@ export class SidebarComponent {
 
     // 1. Set Dashboard path based on role
     const dashboardRoute = this.currentUser.role === 'SUPERVISOR' 
-      ? '/supervisor/dashboard' 
+      ? '/dashboard' 
       : '/dashboard';
 
     this.menuItems = [
