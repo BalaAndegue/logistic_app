@@ -29,7 +29,7 @@
             </div>
             <div class="stock-status">
               <span [class]="(product?.quantity || 0) > 0 ? 'in-stock' : 'out-of-stock'">
-                {{ (product?.quantity || 0) > 0 ? 'In Stock' : 'Out of Stock' }}
+                {{ (product.quantity || 0) > 0 ? 'In Stock' : 'Out of Stock' }}
             </span>
             </div>
           </div>

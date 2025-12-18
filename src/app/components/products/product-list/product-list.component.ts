@@ -142,11 +142,11 @@ export class ProductListComponent implements OnInit {
         return firstImage;
       }
     }
-    return 'assets/images/placeholder-product.jpg';
+    return 'https://i.pinimg.com/736x/6d/f6/84/6df684f8427dd671088a474ac9d8de93.jpg';
   }
 
   onImageError(event: any): void {
-    event.target.src = 'assets/images/placeholder-product.jpg';
+    event.target.src = 'https://i.pinimg.com/736x/6d/f6/84/6df684f8427dd671088a474ac9d8de93.jpg';
   }
 
   goToPage(page: number): void {

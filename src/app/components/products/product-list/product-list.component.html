@@ -225,9 +225,9 @@
           </p>
           
           <div class="product-price">
-            <span class="current-price">${{ getPrice(product) | number:'1.2-2' }}</span>
+            <span class="current-price">XAF {{ getPrice(product) | number:'1.2-2' }}</span>
             <span *ngIf="product.compare_price" class="compare-price">
-              ${{ product.compare_price | number:'1.2-2' }}
+              XAF {{ product.compare_price | number:'1.2-2' }}
             </span>
           </div>
           
