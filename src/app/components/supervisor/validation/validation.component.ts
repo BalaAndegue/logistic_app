@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SupervisorMockService } from '../../../services/supervisor-mock.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-validation',
@@ -13,51 +13,70 @@ export class ValidationComponent implements OnInit {
   pendingDeliveries: any[] = [];
   selectedDelivery: any = null;
   loading = true;
+  processing = false;
 
-  constructor(private supervisorService: SupervisorMockService) {}
+  private apiUrl = 'https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud/api';
+  private token = '89|keKVIHu4YwfLJcsrFQkS9Cbzbo6KCBcnzODtbeHef9616b04';
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadPendingValidations();
+    this.fetchPendingDeliveries();
   }
 
-  loadPendingValidations() {
-    // In a real scenario, this calls your Laravel API
-    this.pendingDeliveries = [
-      {
-        id: 'DEL-1024',
-        driver: 'Jean D.',
-        client: 'Pharmacie du Centre',
-        time: '14:20',
-        proofs: {
-          signature: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Jon_Kirsch_Signature.png',
-          photo: 'https://images.unsplash.com/photo-1586769852044-692d6e39241c?auto=format&fit=crop&q=80&w=400',
-          qrCode: 'Scanned Successfully'
-        }
+  getHeaders() {
+    return new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
+  }
+
+  fetchPendingDeliveries(): void {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/deliveries/pending`, { headers: this.getHeaders() }).subscribe({
+      next: (response) => {
+        this.pendingDeliveries = response.data;
+        this.loading = false;
       },
-      {
-        id: 'DEL-1025',
-        driver: 'Marie K.',
-        client: 'Supermarché Express',
-        time: '15:45',
-        proofs: {
-          signature: null, // Test case for missing info
-          photo: 'https://images.unsplash.com/photo-1530124560676-40bc94ec2105?auto=format&fit=crop&q=80&w=400',
-          qrCode: 'Manual Entry'
-        }
+      error: (err) => {
+        console.error('API Error:', err);
+        this.loading = false;
       }
-    ];
-    this.loading = false;
+    });
   }
 
-  selectDelivery(delivery: any) {
+  onSelectDelivery(delivery: any): void {
     this.selectedDelivery = delivery;
   }
 
-  validateDelivery(id: string) {
-    // Logic to call backend validation
-    console.log(`Validating delivery ${id}...`);
-    this.pendingDeliveries = this.pendingDeliveries.filter(d => d.id !== id);
-    this.selectedDelivery = null;
-    alert('Delivery validated successfully!');
+  // Implementation of the Status Update logic
+  updateDeliveryStatus(status: 'EN_ROUTE' | 'CANCELLED'): void {
+    if (!this.selectedDelivery) return;
+
+    this.processing = true;
+    const orderId = this.selectedDelivery.id;
+    const body = { status: status };
+
+    this.http.put(`${this.apiUrl}/deliveries/${orderId}/status`, body, { headers: this.getHeaders() })
+      .subscribe({
+        next: () => {
+          alert(`Order ${this.selectedDelivery.order_number} marked as ${status}`);
+          this.selectedDelivery = null;
+          this.fetchPendingDeliveries(); // Refresh the list
+          this.processing = false;
+        },
+        error: (err) => {
+          console.error('Update failed:', err);
+          alert('Failed to update status. Please check permissions.');
+          this.processing = false;
+        }
+      });
+  }
+
+  confirmValidation(): void {
+    this.updateDeliveryStatus('EN_ROUTE');
+  }
+
+  rejectValidation(): void {
+    if (confirm('Are you sure you want to cancel this delivery?')) {
+      this.updateDeliveryStatus('CANCELLED');
+    }
   }
 }

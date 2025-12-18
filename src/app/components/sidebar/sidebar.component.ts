@@ -38,7 +38,7 @@ export class SidebarComponent {
     if (this.currentUser.role === 'SUPERVISOR') {
       this.menuItems.push(
         { label: 'Live Tracking', icon: 'bi-map', route: '/supervisor/realtime' },
-        { label: 'Validations', icon: 'bi-shield-check', route: '/supervisor/validation' },
+        //{ label: 'Validations', icon: 'bi-shield-check', route: '/supervisor/validation' },
         { label: 'Reports', icon: 'bi-graph-up', route: '/supervisor/reports' }
       );
     }
