@@ -18,7 +18,6 @@ export class ProductListComponent implements OnInit {
   products: Product[] = [];
   categories: Category[] = [];
   filters: ProductFilters = {};
-  stats?: ProductStats;
   isLoading = true;
   currentPage = 1;
   totalPages = 1;
@@ -31,19 +30,22 @@ export class ProductListComponent implements OnInit {
     private productService: ProductService,
     private categoryService: CategoryService
   ) {}
-
+  stats: ProductStats | undefined;
   ngOnInit(): void {
     this.loadCategories();
     this.loadProducts();
-    if (this.isVendorView) {
-      this.loadStats();
-    }
   }
 
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
-      next: (categories) => this.categories = categories,
-      error: (error) => console.error('Error loading categories', error)
+      next: (categories) => {
+        console.log('Categories loaded:', categories);
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Error loading categories', error);
+        this.error = 'Failed to load categories';
+      }
     });
   }
 
@@ -51,40 +53,18 @@ export class ProductListComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
     
-    if (this.isVendorView) {
-      this.productService.getMyProducts().subscribe({
-        next: (products) => {
-          this.products = products;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.error = 'Error loading vendor products';
-          this.isLoading = false;
-          console.error('Error loading vendor products', error);
-        }
-      });
-    } else {
-      this.productService.getAll(this.filters).subscribe({
-        next: (products) => {
-          this.products = products;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.error = 'Error loading products';
-          this.isLoading = false;
-          console.error('Error loading products', error);
-        }
-      });
-    }
-  }
-
-  loadStats(): void {
-    this.productService.getStats().subscribe({
-      next: (stats) => {
-        this.stats = stats;
+    console.log('Loading products with filters:', this.filters);
+    
+    this.productService.getAll(this.filters).subscribe({
+      next: (products) => {
+        console.log('Products loaded:', products);
+        this.products = products;
+        this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading stats', error);
+        console.error('Error loading products', error);
+        this.error = 'Error loading products';
+        this.isLoading = false;
       }
     });
   }
@@ -150,10 +130,12 @@ export class ProductListComponent implements OnInit {
 
   exportProducts(): void {
     console.log('Export products functionality to be implemented');
-    // Implémentation de l'export
   }
 
   getProductImage(product: Product): string {
+    if (product.image) {
+      return product.image;
+    }
     if (product.images && product.images.length > 0) {
       const firstImage = product.images[0];
       if (typeof firstImage === 'string') {
@@ -186,9 +168,36 @@ export class ProductListComponent implements OnInit {
     return pages;
   }
 
-  // Méthode pour calculer la remise
-  calculateDiscount(price: number, comparePrice?: number): number {
-    if (!comparePrice || comparePrice <= price) return 0;
-    return Math.round(((comparePrice - price) / comparePrice) * 100);
+  calculateDiscount(price: number | string, comparePrice?: number): number {
+    const priceNum = typeof price === 'string' ? parseFloat(price) : price;
+    if (!comparePrice || comparePrice <= priceNum) return 0;
+    return Math.round(((comparePrice - priceNum) / comparePrice) * 100);
+  }
+
+  // Méthode pour obtenir la quantité
+  getQuantity(product: Product): number {
+    return product.stock || 0;
+  }
+
+  // Méthode pour obtenir le prix formaté
+  getPrice(product: Product): number {
+    return typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+  }
+
+  // Méthode pour vérifier si le produit est en stock
+  isInStock(product: Product): boolean {
+    return (product.stock || product.quantity || 0) > 0;
+  }
+
+
+   loadStats(): void {
+    this.productService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+      },
+      error: (error) => {
+        console.error('Error loading stats:', error);
+      }
+    });
   }
 }
