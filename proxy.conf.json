@@ -1,0 +1,8 @@
+{
+  "/api/*": {
+    "target": "https://shopecart-web-project-tp-4-laravel-full-pyh9fx.laravel.cloud",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

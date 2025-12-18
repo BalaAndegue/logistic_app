@@ -68,7 +68,10 @@
               "buildTarget": "logistics-app:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+           "options": {
+    "proxyConfig": "proxy.conf.json"
+  }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
@@ -97,5 +100,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "80e21a3e-1414-4b89-8ce6-00fa3dc6407c"
   }
 }
