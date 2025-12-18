@@ -1,0 +1,243 @@
+<div class="category-list">
+  <div class="container">
+    <!-- En-tête -->
+    <div class="header">
+      <h1 class="title">
+        <i class="bi bi-tags"></i>
+        Categories
+      </h1>
+      
+      <div class="actions">
+        <button 
+          class="btn btn-primary"
+          routerLink="/categories/new">
+          <i class="bi bi-plus-circle"></i>
+          Add Category
+        </button>
+        
+        <div class="btn-group" role="group">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary"
+            (click)="toggleView()"
+            [class.active]="viewMode === 'table'">
+            <i class="bi bi-table"></i>
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary"
+            (click)="toggleView()"
+            [class.active]="viewMode === 'tree'">
+            <i class="bi bi-diagram-3"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- État de chargement -->
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p>Loading categories...</p>
+    </div>
+
+    <!-- Erreur -->
+    <div *ngIf="error && !isLoading" class="error">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ error }}
+      <button class="btn btn-sm btn-outline-primary ms-2" (click)="loadCategories()">
+        Retry
+      </button>
+    </div>
+
+    <!-- État vide -->
+    <div *ngIf="!isLoading && !error && categories.length === 0" class="empty-state">
+      <i class="bi bi-tags"></i>
+      <h3>No Categories Found</h3>
+      <p>There are no categories yet. Create your first category to organize your products.</p>
+      <button 
+        class="btn btn-primary"
+        routerLink="/categories/new">
+        <i class="bi bi-plus-circle"></i>
+        Create First Category
+      </button>
+    </div>
+
+    <!-- Vue Tableau -->
+    <div *ngIf="!isLoading && !error && categories.length > 0 && viewMode === 'table'" class="categories-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of categories">
+            <td>
+              <div class="category-name">
+                <div class="category-icon">
+                  <img 
+                    *ngIf="getImageUrl(category.image)" 
+                    [src]="getImageUrl(category.image)" 
+                    [alt]="category.name"
+                    (error)="onImageError($event)">
+                  <div *ngIf="!getImageUrl(category.image)" class="icon-placeholder">
+                    <i class="bi bi-tag"></i>
+                  </div>
+                </div>
+                <div class="name-info">
+                  <div class="name">{{ category.name }}</div>
+                  <div class="slug">{{ category.slug }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="category-status">
+                <span class="status-badge" [class]="category.is_active ? 'active' : 'inactive'">
+                  {{ category.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="created-date">
+                {{ category.created_at | date:'shortDate' }}
+              </span>
+            </td>
+            <td>
+              <div class="category-actions">
+                <button 
+                  class="btn btn-sm btn-outline-primary"
+                  [routerLink]="['/categories', category.id, 'edit']"
+                  [title]="'Edit ' + category.name">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                
+                <button 
+                  class="btn btn-sm btn-outline-success"
+                  [title]="'View ' + category.name">
+                  <i class="bi bi-eye"></i>
+                </button>
+                
+                <button 
+                  class="btn btn-sm btn-outline-warning"
+                  (click)="toggleActive(category)"
+                  [title]="category.is_active ? 'Deactivate' : 'Activate'">
+                  <i [class]="category.is_active ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
+                </button>
+                
+                <button 
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="deleteCategory(category.id!)"
+                  [title]="'Delete ' + category.name">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Vue Arborescente -->
+    <div *ngIf="!isLoading && !error && categories.length > 0 && viewMode === 'tree'" class="tree-view">
+      <div *ngFor="let category of categoriesTree" class="category-node">
+        <div class="node-header" (click)="toggleNode(category)">
+          <span class="toggle-icon" *ngIf="hasChildren(category)">
+            <i [class]="isExpanded(category.id!) ? 'bi bi-chevron-right expanded' : 'bi bi-chevron-right'"></i>
+          </span>
+          <span class="toggle-icon no-children" *ngIf="!hasChildren(category)">
+            <i class="bi bi-circle"></i>
+          </span>
+          
+          <div class="node-icon">
+            <img 
+              *ngIf="getImageUrl(category.image)" 
+              [src]="getImageUrl(category.image)" 
+              [alt]="category.name"
+              (error)="onImageError($event)">
+            <div *ngIf="!getImageUrl(category.image)" class="icon-placeholder">
+              <i class="bi bi-tag"></i>
+            </div>
+          </div>
+          
+          <div class="node-info">
+            <div class="node-name">
+              {{ category.name }}
+              <span class="badge bg-primary" *ngIf="hasChildren(category)">
+                {{ getChildCount(category) }}
+              </span>
+            </div>
+            <div class="node-meta">
+              <span class="status-badge" [class]="category.is_active ? 'active' : 'inactive'">
+                {{ category.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="node-actions">
+            <button 
+              class="btn btn-sm btn-outline-primary"
+              [routerLink]="['/categories', category.id, 'edit']"
+              (click)="$event.stopPropagation()">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-danger"
+              (click)="deleteCategory(category.id!); $event.stopPropagation()">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Enfants -->
+        <div *ngIf="isExpanded(category.id!) && category.children && category.children.length > 0" class="node-children">
+          <div *ngFor="let child of category.children" class="category-node">
+            <div class="node-header">
+              <span class="toggle-icon no-children">
+                <i class="bi bi-circle"></i>
+              </span>
+              
+              <div class="node-icon">
+                <img 
+                  *ngIf="getImageUrl(child.image)" 
+                  [src]="getImageUrl(child.image)" 
+                  [alt]="child.name"
+                  (error)="onImageError($event)">
+                <div *ngIf="!getImageUrl(child.image)" class="icon-placeholder">
+                  <i class="bi bi-tag"></i>
+                </div>
+              </div>
+              
+              <div class="node-info">
+                <div class="node-name">{{ child.name }}</div>
+                <div class="node-meta">
+                  <span class="status-badge" [class]="child.is_active ? 'active' : 'inactive'">
+                    {{ child.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="node-actions">
+                <button 
+                  class="btn btn-sm btn-outline-primary"
+                  [routerLink]="['/categories', child.id, 'edit']"
+                  (click)="$event.stopPropagation()">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button 
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="deleteCategory(child.id!); $event.stopPropagation()">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

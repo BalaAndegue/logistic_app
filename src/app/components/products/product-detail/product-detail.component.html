@@ -1,0 +1,40 @@
+<div class="product-detail">
+  <div class="container">
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+
+    <div *ngIf="product && !isLoading" class="product-content">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="product-images">
+            <!-- Main image will be added here -->
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            <p class="text-muted">{{ product.short_description }}</p>
+            <div class="price">
+              <span class="current-price">${{ product.price }}</span>
+              <span *ngIf="product.compare_price" class="compare-price">
+                ${{ product.compare_price }}
+              </span>
+            </div>
+            <div class="stock-status">
+              <span [class]="product.quantity > 0 ? 'in-stock' : 'out-of-stock'">
+                {{ product.quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

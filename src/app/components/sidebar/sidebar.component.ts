@@ -40,7 +40,9 @@ export class SidebarComponent {
     if (this.currentUser.role === 'ADMIN' || this.currentUser.role === 'MANAGER') {
       this.menuItems.push(
         { label: 'Drivers', icon: 'bi-people', route: '/drivers' },
-        { label: 'Deliveries', icon: 'bi-box-seam', route: '/deliveries' }
+        { label: 'Deliveries', icon: 'bi-box-seam', route: '/deliveries' },
+        { label: 'Categories', icon: 'bi-tags', route: '/categories' },
+        { label: 'Products', icon: 'bi-box', route: '/products' }
       );
     }
 
@@ -59,8 +61,18 @@ export class SidebarComponent {
     if (this.currentUser.role === 'ADMIN') {
       this.menuItems.push(
         { label: 'Users', icon: 'bi-person-gear', route: '/users' },
-        { label: 'Settings', icon: 'bi-gear', route: '/settings' }
+        { label: 'Settings', icon: 'bi-gear', route: '/settings' },
+
       );
     }
+
+
+    // Add vendor specific menu
+  if (this.currentUser.role === 'VENDOR') {
+    this.menuItems.push(
+      { label: 'My Products', icon: 'bi-box', route: '/vendor/products' },
+      { label: 'My Categories', icon: 'bi-tags', route: '/vendor/categories' }
+    );
+  }
   }
 }

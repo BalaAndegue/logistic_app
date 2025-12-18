@@ -1,0 +1,212 @@
+<!-- src/app/components/products/variant-form/variant-form.component.html -->
+<div class="variant-form">
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="bi bi-boxes"></i>
+      {{ isEditMode ? 'Edit Variant' : 'Add Variant' }}
+    </h5>
+    <button 
+      type="button" 
+      class="btn-close" 
+      (click)="cancel()"
+      aria-label="Close"></button>
+  </div>
+  
+  <div class="modal-body">
+    <form (ngSubmit)="save()" #variantForm="ngForm">
+      <!-- Informations de base -->
+      <div class="form-group">
+        <label for="sku">
+          SKU <span class="required">*</span>
+        </label>
+        <input 
+          type="text" 
+          id="sku" 
+          name="sku" 
+          [(ngModel)]="newVariant.sku" 
+          required 
+          class="form-control"
+          placeholder="e.g., PROD-RED-M">
+        <div class="form-text">
+          Unique stock keeping unit for this variant.
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="name">
+          Variant Name <span class="required">*</span>
+        </label>
+        <input 
+          type="text" 
+          id="name" 
+          name="name" 
+          [(ngModel)]="newVariant.name" 
+          required 
+          class="form-control"
+          placeholder="e.g., Red / Medium">
+        <div class="form-text">
+          Descriptive name for this variant combination.
+        </div>
+      </div>
+      
+      <!-- Sélection des attributs -->
+      <div *ngIf="availableAttributes && Object.keys(availableAttributes).length > 0" class="attributes-section">
+        <div class="attribute-selection">
+          <h6 class="mb-3">Attributes</h6>
+          <div class="attribute-options">
+            <div *ngFor="let attrName of objectKeys(availableAttributes)" class="attribute-option">
+              <label class="option-label">{{ attrName | titlecase }}</label>
+              <div class="option-values">
+                <span 
+                  *ngFor="let value of availableAttributes[attrName]"
+                  class="option-value"
+                  [class.selected]="selectedAttributes[attrName] === value"
+                  (click)="selectAttribute(attrName, value)">
+                  {{ value }}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="variant-name-preview">
+            <div class="preview-label">Variant Preview</div>
+            <div class="preview-value">
+              {{ newVariant.name || 'Select attributes' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Prix et stock -->
+      <div class="price-row">
+        <div class="form-group">
+          <label for="price">
+            Price <span class="required">*</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input 
+              type="number" 
+              id="price" 
+              name="price" 
+              [(ngModel)]="newVariant.price" 
+              required 
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="compare_price">Compare at Price</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input 
+              type="number" 
+              id="compare_price" 
+              name="compare_price" 
+              [(ngModel)]="newVariant.compare_price" 
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="quantity">
+            Quantity <span class="required">*</span>
+          </label>
+          <input 
+            type="number" 
+            id="quantity" 
+            name="quantity" 
+            [(ngModel)]="newVariant.quantity" 
+            required 
+            min="0"
+            step="1"
+            class="form-control"
+            placeholder="0">
+        </div>
+      </div>
+      
+      <!-- Image du variant -->
+      <div class="image-upload-section">
+        <h6 class="mb-3">Variant Image</h6>
+        <div 
+          class="image-upload-area"
+          (click)="fileInput.click()">
+          
+          <input 
+            type="file" 
+            #fileInput
+            (change)="onImageSelect($event)"
+            accept="image/*"
+            class="d-none">
+          
+          <i class="bi bi-image"></i>
+          
+          <div class="upload-text">
+            <span class="browse-link">Click to upload</span> variant image
+          </div>
+          
+          <div class="upload-hint">
+            Optional. Overrides product image for this variant.
+          </div>
+        </div>
+        
+        <!-- Aperçu -->
+        <div *ngIf="imagePreview" class="image-preview">
+          <div class="preview-container">
+            <img [src]="imagePreview" alt="Variant image">
+            <button 
+              type="button" 
+              class="remove-image"
+              (click)="removeImage()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Statut -->
+      <div class="form-group">
+        <div class="form-check form-switch">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="is_active"
+            name="is_active"
+            [(ngModel)]="newVariant.is_active"
+            checked>
+          <label class="form-check-label" for="is_active">
+            Active
+          </label>
+        </div>
+        <div class="form-text">
+          Inactive variants won't be visible to customers.
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div class="modal-footer">
+    <button 
+      type="button" 
+      class="btn btn-secondary"
+      (click)="cancel()">
+      <i class="bi bi-x-circle"></i>
+      Cancel
+    </button>
+    
+    <button 
+      type="button" 
+      class="btn btn-primary"
+      (click)="save()"
+      [disabled]="!variantForm.form.valid">
+      <i class="bi bi-check-circle"></i>
+      {{ isEditMode ? 'Update' : 'Add' }} Variant
+    </button>
+  </div>
+</div>

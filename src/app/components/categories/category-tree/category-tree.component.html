@@ -1,0 +1,132 @@
+<!-- src/app/components/categories/category-tree/category-tree.component.html -->
+<div class="category-tree">
+  <div class="tree-header">
+    <h3 class="title">
+      <i class="bi bi-diagram-3"></i>
+      Category Tree
+    </h3>
+    
+    <div class="actions">
+      <button 
+        class="btn btn-sm btn-outline-primary"
+        (click)="expandAll()">
+        <i class="bi bi-plus-circle"></i>
+        Expand All
+      </button>
+      <button 
+        class="btn btn-sm btn-outline-secondary"
+        (click)="collapseAll()">
+        <i class="bi bi-dash-circle"></i>
+        Collapse All
+      </button>
+      <button 
+        class="btn btn-sm btn-outline-success"
+        (click)="refresh()">
+        <i class="bi bi-arrow-clockwise"></i>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner-border spinner-border-sm text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <span>Loading categories...</span>
+  </div>
+
+  <!-- État vide -->
+  <div *ngIf="!isLoading && (!categories || categories.length === 0)" class="empty-tree">
+    <i class="bi bi-tags"></i>
+    <h4>No Categories</h4>
+    <p>No categories have been created yet.</p>
+    <button 
+      class="btn btn-sm btn-primary"
+      routerLink="/categories/new">
+      <i class="bi bi-plus-circle"></i>
+      Create Category
+    </button>
+  </div>
+
+  <!-- Arborescence -->
+  <div *ngIf="!isLoading && categories && categories.length > 0" class="tree-container">
+    <ng-container *ngFor="let category of categories">
+      <div class="category-node">
+        <div 
+          class="node-header"
+          [class.selected]="selectedCategory?.id === category.id"
+          (click)="toggleNode(category)">
+          
+          <!-- Icône de dépliage -->
+          <span class="toggle-icon" *ngIf="hasChildren(category)">
+            <i [class]="isExpanded(category.id!) ? 'bi bi-chevron-right expanded' : 'bi bi-chevron-right'"></i>
+          </span>
+          <span class="toggle-icon no-children" *ngIf="!hasChildren(category)">
+            <i class="bi bi-circle"></i>
+          </span>
+          
+          <!-- Icône de catégorie -->
+          <div class="node-icon">
+            <img 
+              *ngIf="category.image && typeof category.image === 'string'" 
+              [src]="category.image" 
+              [alt]="category.name"
+              (error)="onImageError($event)">
+            <div *ngIf="!category.image" class="icon-placeholder">
+              <i class="bi bi-tag"></i>
+            </div>
+          </div>
+          
+          <!-- Informations -->
+          <div class="node-info">
+            <div class="node-name">
+              {{ category.name }}
+              <span *ngIf="hasChildren(category)" class="badge bg-secondary ms-1">
+                {{ getChildCount(category) }}
+              </span>
+              <span *ngIf="category.product_count" class="badge bg-primary ms-1">
+                {{ category.product_count }}
+              </span>
+            </div>
+            
+            <div class="node-meta">
+              <span class="status-badge" [class]="category.is_active ? 'active' : 'inactive'">
+                {{ category.is_active ? 'Active' : 'Inactive' }}
+              </span>
+              
+              <span class="slug">
+                {{ category.slug }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="node-actions">
+            <button 
+              class="btn btn-sm btn-outline-primary"
+              (click)="onEdit(category); $event.stopPropagation()">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-danger"
+              (click)="onDelete(category); $event.stopPropagation()">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Enfants -->
+        <div *ngIf="isExpanded(category.id!) && category.children && category.children.length > 0" class="node-children">
+          <app-category-tree 
+            [categories]="category.children"
+            [level]="level + 1"
+            (edit)="onEdit($event)"
+            (delete)="onDelete($event)"
+            (select)="onSelect($event)">
+          </app-category-tree>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

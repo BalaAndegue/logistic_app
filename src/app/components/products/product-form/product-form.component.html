@@ -1,0 +1,29 @@
+<div class="product-form">
+  <div class="container">
+    <h2>{{ isEditMode ? 'Edit Product' : 'Create New Product' }}</h2>
+    
+    <form (ngSubmit)="onSubmit()" #productForm="ngForm">
+      <!-- Basic product info will be added here -->
+      <div class="form-group">
+        <label for="name">Product Name *</label>
+        <input 
+          type="text" 
+          id="name" 
+          name="name" 
+          [(ngModel)]="product.name" 
+          required 
+          class="form-control"
+          placeholder="Enter product name">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+          {{ isLoading ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+        </button>
+        <button type="button" class="btn btn-secondary" routerLink="/products">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
