@@ -12,7 +12,7 @@ button.addEventListener("click",()=>{
     
     status.innerText="Connected"
     // Authenticate driver
-    ws.send(JSON.stringify({ type: 'auth', role: "driver", driverId: 'driver_123' }));
+    ws.send(JSON.stringify({ type: 'auth', role: "driver", driverId: '1' }));
 
  let lastSent = 0;
 

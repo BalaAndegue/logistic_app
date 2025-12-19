@@ -7,6 +7,7 @@ import { DeliveriesComponent } from './components/deliveries/deliveries.componen
 import { DriversComponent } from './components/drivers/drivers.component';
 import { ReportsComponent } from './components/reports/reports.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { LiveTrackingComponent } from './components/live-tracking/live-tracking.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -20,6 +21,7 @@ export const routes: Routes = [
             { path: 'deliveries', component: DeliveriesComponent },
             { path: 'drivers', component: DriversComponent },
             { path: 'reports', component: ReportsComponent },
+            { path: 'live-tracking', component: LiveTrackingComponent },
             { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
             // Other routes will go here
         ]

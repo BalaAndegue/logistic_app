@@ -29,7 +29,7 @@ export class SidebarComponent {
 
     // Common items
     const dashboard = { label: 'Dashboard', icon: 'bi-grid', route: '/dashboard' };
-    const tracking = { label: 'Live Tracking', icon: 'bi-map', route: '/tracking' };
+    const tracking = { label: 'Live Tracking', icon: 'bi-map', route: '/live-tracking' };
     const reports = { label: 'Reports', icon: 'bi-graph-up', route: '/reports' };
 
     // Role specific
