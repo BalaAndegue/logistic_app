@@ -3,6 +3,7 @@ import { LoginComponent } from './components/login/login.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { authGuard } from './guards/auth.guard';
+import { LiveTrackingComponent } from './components/live-tracking/live-tracking.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -13,8 +14,10 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: DashboardComponent },
+            {path:"live-tracking",component:LiveTrackingComponent}
             // Other routes will go here
         ]
     },
     { path: '**', redirectTo: '' }
+    
 ];

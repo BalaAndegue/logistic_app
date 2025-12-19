@@ -1,0 +1,15 @@
+.connected_drivers{
+    padding: 1rem;
+    background-color: beige;
+    border:2px solid #e78f24;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+ul{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    
+    list-style: none;
+}

@@ -1,7 +1,7 @@
 
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule,Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 
@@ -17,7 +17,7 @@ export class SidebarComponent {
 
   menuItems: any[] = [];
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService,private router:Router) {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.updateMenu();
@@ -62,5 +62,9 @@ export class SidebarComponent {
         { label: 'Settings', icon: 'bi-gear', route: '/settings' }
       );
     }
+  }
+
+  goToLiveTracking(){
+    this.router.navigate(["/live-tracking"])
   }
 }
