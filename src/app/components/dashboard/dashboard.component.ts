@@ -2,14 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StatsService, DashboardStats, ChartData } from '../../services/stats.service';
 import { NgChartsModule } from 'ng2-charts';
-
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
- imports: [CommonModule, NgChartsModule],
-
+  imports: [CommonModule, NgChartsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

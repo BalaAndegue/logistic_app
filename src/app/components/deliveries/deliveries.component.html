@@ -1,0 +1,297 @@
+<div class="deliveries-container">
+    <!-- En-tête avec actions -->
+    <div class="deliveries-header">
+        <h2>Gestion des Livraisons</h2>
+        
+        <div class="header-actions" *ngIf="canAutoAssign()">
+            <button class="btn btn-primary" (click)="triggerAutoAssignment()">
+                <i class="bi bi-robot"></i>
+                Assignation Automatique
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="filters-section card">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label class="filter-label">Statut</label>
+                <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+                    <option *ngFor="let option of statusOptions" [value]="option.value">
+                        {{ option.label }}
+                    </option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Livreur</label>
+                <select class="form-select" [(ngModel)]="driverFilter" (change)="applyFilters()">
+                    <option value="all">Tous les livreurs</option>
+                    <option *ngFor="let driver of drivers" [value]="driver.id">
+                        {{ driver.full_name }}
+                    </option>
+                </select>
+            </div>
+            
+            <div class="filter-group filter-search">
+                <label class="filter-label">Rechercher</label>
+                <div class="search-input">
+                    <span class="search-icon">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        class="search-field" 
+                        placeholder="Rechercher par client, référence, adresse..."
+                        [(ngModel)]="searchQuery"
+                        (input)="applyFilters()"
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des livraisons -->
+    <div class="deliveries-table card">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Référence</th>
+                        <th>Client</th>
+                        <th>Adresse</th>
+                        <th>Statut</th>
+                        <th>Livreur</th>
+                        <th>Créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngIf="!loading; else loadingTpl">
+                        <tr *ngFor="let delivery of paginatedDeliveries">
+                            <td>
+                                <strong class="reference">{{ delivery.reference }}</strong>
+                                <br>
+                                <small class="order-id">#{{ delivery.order_id }}</small>
+                            </td>
+                            <td>
+                                <div class="customer-info">
+                                    <div class="name">{{ delivery.customer_name }}</div>
+                                    <small class="phone">{{ delivery.customer_phone }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="address-info">
+                                    <div>{{ delivery.delivery_address }}</div>
+                                    <small>{{ delivery.city }} {{ delivery.postal_code }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge" [ngClass]="getStatusBadgeClass(delivery.status)">
+                                    {{ getStatusLabel(delivery.status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="driver-info">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>{{ getDriverName(delivery.driver_id) }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-info">
+                                    {{ formatDate(delivery.created_at) }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button 
+                                        class="btn-icon btn-view"
+                                        [routerLink]="['/deliveries', delivery.id]"
+                                        title="Détails"
+                                    >
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    
+                                    <button 
+                                        *ngIf="delivery.status === 'PENDING' && canAssign()"
+                                        class="btn-icon btn-assign"
+                                        (click)="openAssignModal(delivery)"
+                                        title="Assigner à un livreur"
+                                    >
+                                        <i class="bi bi-person-plus"></i>
+                                    </button>
+                                    
+                                    <button 
+                                        *ngIf="delivery.status === 'EN_ROUTE' || delivery.status === 'PICKED_UP'"
+                                        class="btn-icon btn-track"
+                                        [routerLink]="['/tracking', delivery.id]"
+                                        title="Suivre la livraison"
+                                    >
+                                        <i class="bi bi-geo-alt"></i>
+                                    </button>
+
+                                    <button 
+                                        *ngIf="delivery.status === 'DELIVERED' && delivery.proof_url"
+                                        class="btn-icon btn-proof"
+                                        [routerLink]="['/deliveries', delivery.id, 'proof']"
+                                        title="Voir la preuve"
+                                    >
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+            
+            <!-- Message vide -->
+            <div *ngIf="filteredDeliveries.length === 0 && !loading" class="empty-state">
+                <i class="bi bi-inbox-empty"></i>
+                <h4>Aucune livraison trouvée</h4>
+                <p>Ajustez vos filtres pour voir les résultats</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-section" *ngIf="filteredDeliveries.length > 0">
+        <div class="pagination-info">
+            Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à 
+            {{ Math.min(currentPage * itemsPerPage, totalItems) }} 
+            sur {{ totalItems }} livraisons
+        </div>
+        
+        <div class="pagination-controls">
+            <button 
+                class="btn-pagination btn-prev" 
+                (click)="prevPage()" 
+                [disabled]="currentPage === 1"
+            >
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <div class="page-numbers">
+                <button 
+                    *ngFor="let page of pageNumbers" 
+                    class="page-number" 
+                    [class.active]="page === currentPage"
+                    (click)="goToPage(page)"
+                >
+                    {{ page }}
+                </button>
+            </div>
+            
+            <button 
+                class="btn-pagination btn-next" 
+                (click)="nextPage()" 
+                [disabled]="currentPage === totalPages"
+            >
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'assignation -->
+<div class="modal-overlay" *ngIf="showAssignModal && selectedDelivery">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 class="modal-title">Assigner une livraison</h3>
+            <button type="button" class="btn-close" (click)="closeAssignModal()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="delivery-preview">
+                <div class="preview-header">
+                    <h4>Livraison {{ selectedDelivery.reference }}</h4>
+                    <div class="preview-meta">
+                        <span class="badge" [ngClass]="getStatusBadgeClass(selectedDelivery.status)">
+                            {{ getStatusLabel(selectedDelivery.status) }}
+                        </span>
+                    </div>
+                </div>
+                <div class="preview-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Client:</span>
+                        <span class="detail-value">{{ selectedDelivery.customer_name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Téléphone:</span>
+                        <span class="detail-value">{{ selectedDelivery.customer_phone }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Adresse:</span>
+                        <span class="detail-value">{{ selectedDelivery.delivery_address }}, {{ selectedDelivery.city }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Créé le:</span>
+                        <span class="detail-value">{{ formatDate(selectedDelivery.created_at) }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <form class="assign-form" (ngSubmit)="assignDelivery()">
+                <div class="form-group">
+                    <label class="form-label">Sélectionner un livreur *</label>
+                    <select 
+                        class="select-field" 
+                        [(ngModel)]="selectedDriverId" 
+                        name="driverId"
+                        required
+                    >
+                        <option value="">Choisir un livreur</option>
+                        <option *ngFor="let driver of drivers" [value]="driver.id">
+                            {{ driver.full_name }} ({{ driver.vehicle_type }}) 
+                            <span *ngIf="driver.status === 'AVAILABLE'">✅ Disponible</span>
+                            <span *ngIf="driver.status !== 'AVAILABLE'">🚫 Occupé</span>
+                        </option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes (optionnel)</label>
+                    <textarea 
+                        class="textarea-field" 
+                        rows="3"
+                        [(ngModel)]="assignmentNotes"
+                        name="notes"
+                        placeholder="Instructions spéciales pour le livreur..."
+                    ></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button 
+                        type="button" 
+                        class="btn btn-secondary" 
+                        (click)="closeAssignModal()"
+                    >
+                        Annuler
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="btn btn-primary"
+                        [disabled]="!selectedDriverId || assigning"
+                    >
+                        <span *ngIf="assigning" class="btn-spinner"></span>
+                        {{ assigning ? 'Assignation...' : 'Confirmer l\'assignation' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Template de chargement -->
+<ng-template #loadingTpl>
+    <tr class="loading-row">
+        <td colspan="7">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Chargement des livraisons...</p>
+            </div>
+        </td>
+    </tr>
+</ng-template>
