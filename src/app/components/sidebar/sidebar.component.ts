@@ -1,7 +1,7 @@
 // components/sidebar/sidebar.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule,Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 
@@ -16,7 +16,7 @@ export class SidebarComponent {
   currentUser: User | null = null;
   menuItems: any[] = [];
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService,private router:Router) {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.updateMenu();
@@ -26,24 +26,13 @@ export class SidebarComponent {
   updateMenu() {
     if (!this.currentUser) return;
 
-    // Items communs
-    const dashboard = { 
-      label: 'Tableau de bord', 
-      icon: 'bi-grid', 
-      route: '/dashboard' 
-    };
-    
-    const tracking = { 
-      label: 'Suivi GPS', 
-      icon: 'bi-map', 
-      route: '/tracking' 
-    };
-    
-    const reports = { 
-      label: 'Rapports', 
-      icon: 'bi-graph-up', 
-      route: '/reports' 
-    };
+    // Common items
+    const dashboard = { label: 'Dashboard', icon: 'bi-grid', route: '/dashboard' };
+    const tracking = { label: 'Live Tracking', icon: 'bi-map', route: '/live-tracking' };
+    const reports = { label: 'Reports', icon: 'bi-graph-up', route: '/reports' };
+
+    // Role specific
+    const restrictedReports = { ...reports, label: 'My Stats' }; // Example diff if needed
 
     // Initialisation avec le dashboard
     this.menuItems = [dashboard];
@@ -94,5 +83,10 @@ export class SidebarComponent {
         }
       );
     }
+  }
+}
+
+  goToLiveTracking(){
+    this.router.navigate(["/live-tracking"])
   }
 }

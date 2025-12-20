@@ -41,3 +41,29 @@ export const routes: Routes = [
     redirectTo: '' 
   }
 ];
+import { DeliveriesComponent } from './components/deliveries/deliveries.component';
+import { DriversComponent } from './components/drivers/drivers.component';
+import { ReportsComponent } from './components/reports/reports.component';
+import { SettingsComponent } from './components/settings/settings.component';
+import { LiveTrackingComponent } from './components/live-tracking/live-tracking.component';
+
+export const routes: Routes = [
+    { path: 'login', component: LoginComponent },
+    {
+        path: '',
+        component: MainLayoutComponent,
+        canActivate: [authGuard],
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', component: DashboardComponent },
+            { path: 'deliveries', component: DeliveriesComponent },
+            { path: 'drivers', component: DriversComponent },
+            { path: 'reports', component: ReportsComponent },
+            { path: 'live-tracking', component: LiveTrackingComponent },
+            { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
+            // Other routes will go here
+        ]
+    },
+    { path: '**', redirectTo: '' }
+    
+];
