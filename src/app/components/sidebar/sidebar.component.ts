@@ -1,4 +1,4 @@
-
+// components/sidebar/sidebar.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule,Router } from '@angular/router';
@@ -14,7 +14,6 @@ import { User } from '../../models/user.model';
 })
 export class SidebarComponent {
   currentUser: User | null = null;
-
   menuItems: any[] = [];
 
   constructor(private authService: AuthService,private router:Router) {
@@ -35,34 +34,57 @@ export class SidebarComponent {
     // Role specific
     const restrictedReports = { ...reports, label: 'My Stats' }; // Example diff if needed
 
+    // Initialisation avec le dashboard
     this.menuItems = [dashboard];
 
+    // Menus ADMIN et MANAGER
     if (this.currentUser.role === 'ADMIN' || this.currentUser.role === 'MANAGER') {
       this.menuItems.push(
-        { label: 'Drivers', icon: 'bi-people', route: '/drivers' },
-        { label: 'Deliveries', icon: 'bi-box-seam', route: '/deliveries' }
+        { 
+          label: 'Livreurs',
+          icon: 'bi-people', 
+          route: '/delivery-persons' 
+        },
+        { 
+          label: 'Commandes',
+          icon: 'bi-box-seam', 
+          route: '/deliveries' 
+        }
       );
     }
 
+    // Suivi GPS (accessible à tous)
     this.menuItems.push(tracking);
 
-    // Supervisor also validates proofs, maybe under tracking or separate? 
-    // Spec says: "Preuves de Livraison : Visualiser ... Valider". 
-    // Let's add a separate menu for Proofs/Validation if needed, or keep it inside Deliveries for context.
-    // For Supervisor specifically, they might want a direct list of "Pending Validation"
+    // Menu SUPERVISOR
     if (this.currentUser.role === 'SUPERVISOR') {
-      this.menuItems.push({ label: 'Validations', icon: 'bi-check-circle', route: '/validations' });
+      this.menuItems.push({ 
+        label: 'Validations', 
+        icon: 'bi-check-circle', 
+        route: '/validations' 
+      });
     }
 
+    // Rapports (accessible à tous)
     this.menuItems.push(reports);
 
+    // Menus ADMIN uniquement
     if (this.currentUser.role === 'ADMIN') {
       this.menuItems.push(
-        { label: 'Users', icon: 'bi-person-gear', route: '/users' },
-        { label: 'Settings', icon: 'bi-gear', route: '/settings' }
+        { 
+          label: 'Utilisateurs',
+          icon: 'bi-person-gear', 
+          route: '/users' 
+        },
+        { 
+          label: 'Paramètres',
+          icon: 'bi-gear', 
+          route: '/settings' 
+        }
       );
     }
   }
+}
 
   goToLiveTracking(){
     this.router.navigate(["/live-tracking"])

@@ -22,6 +22,8 @@ export class AuthService {
         return this.currentUserSubject.value;
     }
 
+
+
     /**
      * Login avec l'API Laravel
      * @param username Nom d'utilisateur ou email
