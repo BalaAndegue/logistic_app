@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective as NgChartsModule} from 'ng2-charts';
 import { AuthService } from '../../services/auth.service';
 import { ReportsService, ReportData, DriverPerformance, TimeSeriesData, ExportOptions } from '../../services/reports.service';
 
