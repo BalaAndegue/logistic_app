@@ -7,9 +7,13 @@ import { authGuard } from './guards/auth.guard';
 import { SupervisorDashboardComponent } from './components/supervisor/supervisor-dashboard.component';
 import { SupervisorRealtimeComponent } from './components/supervisor/supervisor-realtime/supervisor-realtime.component';
 import { ValidationComponent } from './components/supervisor/validation/validation.component';
-import { ReportsComponent } from './components/supervisor/reports/reports.component';
+//import { ReportsComponent } from './components/supervisor/reports/reports.component';
 import { TrackingComponent } from './components/tracking/tracking.component';
 import { RoleGuard } from './guards/role.guard';
+import { DeliveriesComponent } from './components/deliveries/deliveries.component';
+import { DriversComponent } from './components/drivers/drivers.component';
+import { ReportsComponent } from './components/reports/reports.component';
+import { SettingsComponent } from './components/settings/settings.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -89,7 +93,11 @@ export const routes: Routes = [
       .then(m => m.ProductListComponent),
     canActivate: [authGuard, RoleGuard],
     data: { roles: ['VENDOR'], vendorView: true }
-  }
+  },
+            { path: 'deliveries', component: DeliveriesComponent },
+            { path: 'drivers', component: DriversComponent },
+            { path: 'reports', component: ReportsComponent },
+            { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
             // Other routes will go here
         ]
     },

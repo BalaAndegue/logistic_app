@@ -6,9 +6,11 @@ import {
   DashboardKPIs, 
   ChartData,
   OrderStatusDistribution,
-  TopProduct 
+  TopProduct,
+  //DashboardStats 
 } from '../../services/stats.service';
 import { BaseChartDirective } from 'ng2-charts';
+import { BaseChartDirective as NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { Subscription, interval, catchError, of } from 'rxjs';
 
@@ -18,7 +20,7 @@ const EUR_TO_CFA = 655.957;
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule, NgChartsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

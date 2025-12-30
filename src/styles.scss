@@ -18,6 +18,9 @@
   --box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --header-height: 64px;
   --sidebar-width: 260px;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --success-color: #10b981;
 }
 
 body {
@@ -97,3 +100,40 @@ h1, h2, h3, h4, h5, h6 {
     margin-left: 0;
   }
 }
+
+// Ajouter dans styles.scss
+.badge-primary-light {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-secondary {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+// Classes pour les performances
+.performance-excellent { background-color: var(--success-color); }
+.performance-good { background-color: #22c55e; }
+.performance-average { background-color: var(--warning-color); }
+.performance-poor { background-color: var(--danger-color); }

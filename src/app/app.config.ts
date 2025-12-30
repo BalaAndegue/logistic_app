@@ -1,16 +1,14 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http'; // ← Ajouter
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'; // ← Ajouter
 
 import { routes } from './app.routes';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideCharts(withDefaultRegisterables()),
-    provideHttpClient() 
+    provideHttpClient(withInterceptorsFromDi())
   ]
 };
