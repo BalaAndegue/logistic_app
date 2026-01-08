@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 // components/sidebar/sidebar.component.ts
->>>>>>> feature/Nchang
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule,Router } from '@angular/router';
@@ -29,28 +26,28 @@ export class SidebarComponent {
   updateMenu() {
     if (!this.currentUser) return;
 
-<<<<<<< HEAD
     // 1. Set Dashboard path based on role
     const dashboardRoute = this.currentUser.role === 'SUPERVISOR' 
       ? '/dashboard' 
       : '/dashboard';
-=======
     // Common items
     const dashboard = { label: 'Dashboard', icon: 'bi-grid', route: '/dashboard' };
     const tracking = { label: 'Live Tracking', icon: 'bi-map', route: '/live-tracking' };
     const reports = { label: 'Reports', icon: 'bi-graph-up', route: '/reports' };
->>>>>>> feature/Nchang
 
     this.menuItems = [
-      { label: 'Dashboard', icon: 'bi-grid', route: dashboardRoute }
+      dashboard
     ];
 
-<<<<<<< HEAD
     // 2. Add Supervisor-specific modules
     if (this.currentUser.role === 'SUPERVISOR') {
       this.menuItems.push(
         { label: 'Live Tracking', icon: 'bi-map', route: '/tracking' },
-        //{ label: 'Validations', icon: 'bi-shield-check', route: '/supervisor/validation' },
+        { 
+          label: 'Validations', 
+          icon: 'bi-check-circle', 
+          route: '/validations' 
+        },
         { label: 'Reports', icon: 'bi-graph-up', route: '/supervisor/reports' }
       );
     }
@@ -61,23 +58,7 @@ export class SidebarComponent {
         { label: 'Drivers', icon: 'bi-people', route: '/drivers' },
         { label: 'Deliveries', icon: 'bi-box-seam', route: '/deliveries' },
         { label: 'Live Tracking', icon: 'bi-map', route: '/tracking' },
-        { label: 'Reports', icon: 'bi-graph-up', route: '/reports' }
-      );
-    }
-
-    // 4. Admin Only
-    if (this.currentUser.role === 'ADMIN') {
-      this.menuItems.push(
-        { label: 'Users', icon: 'bi-person-gear', route: '/users' },
-        { label: 'Settings', icon: 'bi-gear', route: '/settings' },
-
-=======
-    // Initialisation avec le dashboard
-    this.menuItems = [dashboard];
-
-    // Menus ADMIN et MANAGER
-    if (this.currentUser.role === 'ADMIN' || this.currentUser.role === 'MANAGER') {
-      this.menuItems.push(
+        { label: 'Reports', icon: 'bi-graph-up', route: '/reports' },
         { 
           label: 'Livreurs',
           icon: 'bi-people', 
@@ -91,17 +72,24 @@ export class SidebarComponent {
       );
     }
 
+    // 4. Admin Only
+    if (this.currentUser.role === 'ADMIN') {
+      this.menuItems.push(
+        { label: 'Users', icon: 'bi-person-gear', route: '/users' },
+        { label: 'Settings', icon: 'bi-gear', route: '/settings' },
+      );
+
+    }
+    
     // Suivi GPS (accessible à tous)
     this.menuItems.push(tracking);
 
-    // Menu SUPERVISOR
-    if (this.currentUser.role === 'SUPERVISOR') {
-      this.menuItems.push({ 
-        label: 'Validations', 
-        icon: 'bi-check-circle', 
-        route: '/validations' 
-      });
-    }
+   // Menu SUPERVISOR
+   if (this.currentUser.role === 'SUPERVISOR') {
+     this.menuItems.push(
+       { label: 'Validations', icon: 'bi-check-circle', route: '/validations' }
+     );
+   }
 
     // Rapports (accessible à tous)
     this.menuItems.push(reports);
@@ -119,7 +107,6 @@ export class SidebarComponent {
           icon: 'bi-gear', 
           route: '/settings' 
         }
->>>>>>> feature/Nchang
       );
     }
 
@@ -131,14 +118,10 @@ export class SidebarComponent {
       { label: 'My Categories', icon: 'bi-tags', route: '/vendor/categories' }
     );
   }
-<<<<<<< HEAD
-  }
-}
-=======
+  
 }
 
   goToLiveTracking(){
     this.router.navigate(["/live-tracking"])
   }
 }
->>>>>>> feature/Nchang
