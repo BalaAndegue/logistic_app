@@ -28,6 +28,7 @@ export class RoleGuard implements CanActivate {
     // Récupérer les rôles requis depuis les données de la route
     const requiredRoles = route.data['roles'] as string[];
     const vendorView = route.data['vendorView'] as boolean;
+  
     
     // Si aucun rôle n'est spécifié, autoriser l'accès
     if (!requiredRoles || requiredRoles.length === 0) {
@@ -65,3 +66,4 @@ export class RoleGuard implements CanActivate {
     );
   }
 }
+

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DriverService, Driver } from '../../services/driver.service';
 import { AuthService } from '../../services/auth.service';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-drivers',
@@ -67,11 +68,23 @@ export class DriversComponent implements OnInit {
 
   constructor(
     private driverService: DriverService,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private dataservice:DataService
+  ) {
+    console.log(this.dataservice)
+  }
 
   ngOnInit(): void {
     this.loadDrivers();
+    this.dataservice.currentMessage.subscribe((msg)=>{
+      console.log(msg)
+      this.paginatedDrivers.forEach(driver=>{
+        if(msg?.includes(driver.id.toString())){
+          //set status as available
+          driver.status="AVAILABLE"
+        }
+      })
+    })
   }
 
   loadDrivers(): void {
@@ -93,7 +106,7 @@ export class DriversComponent implements OnInit {
 
   applyFilters(): void {
     let filtered = [...this.drivers];
-
+console.log(this.dataservice)
     // Filtre par statut
     if (this.statusFilter !== 'all') {
       filtered = filtered.filter(d => d.status === this.statusFilter);
