@@ -1,0 +1,50 @@
+<div class="drivers-container" >
+
+  <div class="drivers-grid">
+    <div class="drivers-cards">
+      <div class="driver-card" *ngFor="let driver of drivers" (click)="handleClick(driver.id)">
+
+        <div class="card-header">
+          <div class="driver-avatar">
+            <i class="bi bi-person-circle"></i>
+          </div>
+
+          <div class="driver-basic-info">
+            <h3>{{ driver.full_name }} {{ driver.id }}</h3>
+            <p class="driver-email">{{ driver.email }}</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="driver-details">
+            <div class="detail-row">
+              <span class="detail-label">Téléphone:</span>
+              <span class="detail-value">{{ driver.phone }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Véhicule:</span>
+              <span class="detail-value">
+                <i class="bi" [ngClass]="getVehicleIcon(driver.vehicle_type)"></i>
+                {{ getVehicleLabel(driver.vehicle_type) }}
+                <span *ngIf="driver.license_plate">
+                  ({{ driver.license_plate }})
+                </span>
+              </span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Statut:</span>
+              <span class="status-badge"
+                    [ngClass]="getStatusBadgeClass(driver.status)">
+                {{ getStatusLabel(driver.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

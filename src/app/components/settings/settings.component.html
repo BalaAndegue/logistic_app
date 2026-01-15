@@ -1,0 +1,279 @@
+<div class="settings-container">
+  <!-- En-tête -->
+  <div class="settings-header">
+    <h2><i class="bi bi-gear-fill"></i> Paramètres du Système</h2>
+    <p class="subtitle">Configurez les paramètres généraux de l'application et les règles d'affectation</p>
+  </div>
+
+  <!-- Messages de notification -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="bi bi-check-circle"></i> {{ successMessage }}
+  </div>
+  
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-circle"></i> {{ errorMessage }}
+  </div>
+
+  <!-- Chargement -->
+  <div class="loading-section" *ngIf="loading">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h4>Chargement des paramètres...</h4>
+    </div>
+  </div>
+
+  <!-- Formulaire principal -->
+  <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" *ngIf="!loading">
+    <div class="settings-sections">
+      
+      <!-- Section: Affectation automatique -->
+      <div class="settings-section">
+        <div class="section-header">
+          <h3><i class="bi bi-robot"></i> Affectation Automatique</h3>
+          <p class="section-description">Configurez les règles d'affectation automatique des livraisons</p>
+        </div>
+        
+        <div class="section-content">
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="autoAssignmentEnabled">
+              <span class="checkmark"></span>
+              <span class="label-text">Activer l'affectation automatique</span>
+            </label>
+            <small class="form-text">Lorsqu'activé, les livraisons sont automatiquement assignées aux livreurs</small>
+          </div>
+
+          <div class="form-group" *ngIf="settingsForm.get('autoAssignmentEnabled')?.value">
+            <label>Algorithme d'affectation</label>
+            <select class="form-select" formControlName="assignmentAlgorithm">
+              <option *ngFor="let algo of autoAssignmentAlgorithms" [value]="algo.value">
+                {{ algo.label }}
+              </option>
+            </select>
+            <small class="form-text">{{ getAlgorithmDescription(settingsForm.get('assignmentAlgorithm')?.value || '') }}</small>
+          </div>
+
+          <div class="form-row" *ngIf="settingsForm.get('autoAssignmentEnabled')?.value">
+            <div class="form-group">
+              <label>Distance maximale (km)</label>
+              <input type="number" class="form-control" formControlName="maxDistance" min="1" max="100">
+              <small class="form-text">Distance maximale entre le livreur et le point de livraison</small>
+              <div class="error-message" *ngIf="settingsForm.get('maxDistance')?.invalid && settingsForm.get('maxDistance')?.touched">
+                La distance doit être entre 1 et 100 km
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Livraisons max par livreur</label>
+              <input type="number" class="form-control" formControlName="maxDeliveriesPerDriver" min="1" max="20">
+              <small class="form-text">Nombre maximum de livraisons simultanées par livreur</small>
+              <div class="error-message" *ngIf="settingsForm.get('maxDeliveriesPerDriver')?.invalid && settingsForm.get('maxDeliveriesPerDriver')?.touched">
+                Doit être entre 1 et 20
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="settingsForm.get('autoAssignmentEnabled')?.value">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="considerTraffic">
+              <span class="checkmark"></span>
+              <span class="label-text">Prendre en compte le trafic</span>
+            </label>
+          </div>
+
+          <div class="form-group" *ngIf="settingsForm.get('autoAssignmentEnabled')?.value">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="considerDriverRating">
+              <span class="checkmark"></span>
+              <span class="label-text">Prendre en compte la note des livreurs</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Notifications -->
+      <div class="settings-section">
+        <div class="section-header">
+          <h3><i class="bi bi-bell-fill"></i> Notifications</h3>
+          <p class="section-description">Gérez les préférences de notifications</p>
+        </div>
+        
+        <div class="section-content">
+          <div class="notification-options">
+            <div class="notification-group">
+              <h4>Canaux de notification</h4>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="emailEnabled">
+                  <span class="checkmark"></span>
+                  <span class="label-text">Notifications par email</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="pushEnabled">
+                  <span class="checkmark"></span>
+                  <span class="label-text">Notifications push</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="notification-group">
+              <h4>Types de notifications</h4>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="assignmentAlerts">
+                  <span class="checkmark"></span>
+                  <span class="label-text">Alertes d'affectation</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="deliveryUpdates">
+                  <span class="checkmark"></span>
+                  <span class="label-text">Mises à jour de livraison</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="reportGeneration">
+                  <span class="checkmark"></span>
+                  <span class="label-text">Rapports générés</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Performances -->
+      <div class="settings-section">
+        <div class="section-header">
+          <h3><i class="bi bi-graph-up-arrow"></i> Critères de Performance</h3>
+          <p class="section-description">Définissez les seuils de performance pour le monitoring</p>
+        </div>
+        
+        <div class="section-content">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Seuil temps de livraison (minutes)</label>
+              <input type="number" class="form-control" formControlName="deliveryTimeThreshold" min="15" max="180">
+              <small class="form-text">Temps maximum acceptable pour une livraison</small>
+              <div class="error-message" *ngIf="settingsForm.get('deliveryTimeThreshold')?.invalid && settingsForm.get('deliveryTimeThreshold')?.touched">
+                Doit être entre 15 et 180 minutes
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Seuil taux de réussite (%)</label>
+              <input type="number" class="form-control" formControlName="successRateThreshold" min="50" max="100">
+              <small class="form-text">Taux de réussite minimum acceptable</small>
+              <div class="error-message" *ngIf="settingsForm.get('successRateThreshold')?.invalid && settingsForm.get('successRateThreshold')?.touched">
+                Doit être entre 50% et 100%
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Seuil de notation</label>
+              <input type="number" class="form-control" step="0.1" formControlName="ratingThreshold" min="1" max="5">
+              <small class="form-text">Note minimum acceptable pour un livreur</small>
+              <div class="error-message" *ngIf="settingsForm.get('ratingThreshold')?.invalid && settingsForm.get('ratingThreshold')?.touched">
+                Doit être entre 1.0 et 5.0
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Système -->
+      <div class="settings-section">
+        <div class="section-header">
+          <h3><i class="bi bi-server"></i> Configuration Système</h3>
+          <p class="section-description">Paramètres avancés de l'application</p>
+        </div>
+        
+        <div class="section-content">
+          <div class="form-group">
+            <label class="checkbox-label warning">
+              <input type="checkbox" formControlName="maintenanceMode">
+              <span class="checkmark"></span>
+              <span class="label-text">Mode maintenance</span>
+            </label>
+            <small class="form-text">Activez cette option pour mettre le système en maintenance (bloque les nouvelles affectations)</small>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Rétention des données (jours)</label>
+              <input type="number" class="form-control" formControlName="dataRetention" min="30" max="365">
+              <small class="form-text">Durée de conservation des données historiques</small>
+              <div class="error-message" *ngIf="settingsForm.get('dataRetention')?.invalid && settingsForm.get('dataRetention')?.touched">
+                Doit être entre 30 et 365 jours
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Fréquence des sauvegardes</label>
+              <select class="form-select" formControlName="backupFrequency">
+                <option *ngFor="let freq of backupFrequencies" [value]="freq.value">
+                  {{ freq.label }}
+                </option>
+              </select>
+              <small class="form-text">Fréquence des sauvegardes automatiques de la base de données</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="settings-actions">
+      <button type="button" class="btn btn-secondary" (click)="resetToDefaults()" [disabled]="saving">
+        <i class="bi bi-arrow-clockwise"></i> Réinitialiser
+      </button>
+      
+      <button type="submit" class="btn btn-primary" [disabled]="saving || settingsForm.invalid">
+        <i class="bi bi-save" *ngIf="!saving"></i>
+        <span class="btn-spinner" *ngIf="saving"></span>
+        {{ saving ? 'Enregistrement...' : 'Enregistrer les paramètres' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Aperçu des paramètres actuels -->
+  <div class="settings-preview" *ngIf="!loading">
+    <div class="preview-header">
+      <h4><i class="bi bi-eye"></i> Aperçu des paramètres actuels</h4>
+    </div>
+    
+    <div class="preview-content">
+      <div class="preview-item">
+        <span class="preview-label">Affectation automatique :</span>
+        <span class="preview-value" [class.active]="systemSettings.autoAssignment.enabled">
+          {{ systemSettings.autoAssignment.enabled ? 'Activée' : 'Désactivée' }}
+        </span>
+      </div>
+      
+      <div class="preview-item" *ngIf="systemSettings.autoAssignment.enabled">
+        <span class="preview-label">Algorithme :</span>
+        <span class="preview-value">
+          {{ getAlgorithmLabel(systemSettings.autoAssignment.algorithm) }}
+        </span>
+      </div>
+      
+      <div class="preview-item">
+        <span class="preview-label">Mode maintenance :</span>
+        <span class="preview-value" [class.warning]="systemSettings.system.maintenanceMode">
+          {{ systemSettings.system.maintenanceMode ? 'Activé' : 'Désactivé' }}
+        </span>
+      </div>
+      
+      <div class="preview-item">
+        <span class="preview-label">Dernière sauvegarde :</span>
+        <span class="preview-value">
+          {{ today | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

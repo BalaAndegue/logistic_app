@@ -1,0 +1,6 @@
+<div class="container">
+
+<app-map [driverCoord]="driverCoord" ></app-map>
+<app-connected-drivers [drivers]="activeDrivers" (suscribe)="handleClick($event)"></app-connected-drivers>
+
+</div>

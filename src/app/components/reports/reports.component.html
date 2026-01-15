@@ -1,0 +1,262 @@
+<div class="reports-container">
+    <!-- En-tête avec actions -->
+    <div class="reports-header">
+        <h2>Rapports & Statistiques</h2>
+        
+        <div class="header-actions" *ngIf="canExport()">
+            <div class="export-controls">
+                <select class="form-select period-select" [(ngModel)]="selectedPeriod" (change)="onPeriodChange()">
+                    <option *ngFor="let option of periodOptions" [value]="option.value">
+                        {{ option.label }}
+                    </option>
+                </select>
+                
+                <button class="btn btn-primary" (click)="exportReport()" [disabled]="exporting">
+                    <i class="bi" [ngClass]="getExportIcon()"></i>
+                    <span *ngIf="!exporting">Exporter</span>
+                    <span *ngIf="exporting">
+                        <span class="btn-spinner"></span>
+                        Export...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques principales -->
+    <div class="stats-section" *ngIf="reportData && !loading">
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ reportData.totalDeliveries }}</h3>
+                    <p>Livraisons totales</p>
+                    <small>{{ reportData.period }}</small>
+                </div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ reportData.successfulDeliveries }}</h3>
+                    <p>Livraisons réussies</p>
+                    <small>{{ reportData.successRate }}% de succès</small>
+                </div>
+            </div>
+            
+            <div class="stat-card time">
+                <div class="stat-icon">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ formatTime(reportData.averageDeliveryTime) }}</h3>
+                    <p>Temps moyen</p>
+                    <small>Par livraison</small>
+                </div>
+            </div>
+            
+            <div class="stat-card revenue" *ngIf="reportData.revenue !== undefined && reportData.revenue !== null">
+                <div class="stat-icon">
+                    <i class="bi bi-currency-euro"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ formatCurrency(reportData.revenue) }}</h3>
+                    <p>Revenu estimé</p>
+                    <small>{{ reportData.period }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="charts-section" *ngIf="!loading">
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Évolution des livraisons</h3>
+                    <small>{{ reportData ? reportData.period : '' }}</small>
+                </div>
+                <div class="chart-container">
+                    <canvas baseChart
+                        [data]="lineChartData"
+                        [options]="lineChartOptions"
+                        [type]="lineChartType">
+                    </canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Top Performers</h3>
+                    <small>8 meilleurs livreurs</small>
+                </div>
+                <div class="chart-container">
+                    <canvas baseChart
+                        [data]="barChartData"
+                        [options]="barChartOptions"
+                        [type]="barChartType">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performances détaillées -->
+    <div class="performance-section" *ngIf="driverPerformance && driverPerformance.length > 0 && !loading">
+        <div class="section-header">
+            <h3>Performances détaillées par livreur</h3>
+            <p>Comparaison des statistiques de chaque livreur</p>
+        </div>
+        
+        <div class="performance-table">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Livreur</th>
+                            <th>Total livraisons</th>
+                            <th>Réussies</th>
+                            <th>Échouées</th>
+                            <th>Taux de succès</th>
+                            <th>Temps moyen</th>
+                            <th>Note</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let driver of driverPerformance">
+                            <td>
+                                <div class="driver-cell">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>{{ driver.driver_name }}</span>
+                                </div>
+                            </td>
+                            <td>{{ driver.total_deliveries }}</td>
+                            <td>
+                                <span class="success-count">{{ driver.successful_deliveries }}</span>
+                            </td>
+                            <td>
+                                <span class="failed-count">{{ driver.failed_deliveries }}</span>
+                            </td>
+                            <td>
+                                <span class="success-rate" [style.color]="getSuccessColor(driver.success_rate)">
+                                    {{ driver.success_rate }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="delivery-time" [style.color]="getTimeColor(driver.average_delivery_time)">
+                                    {{ formatTime(driver.average_delivery_time) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="rating" *ngIf="driver.rating !== undefined && driver.rating !== null">
+                                    <i class="bi bi-star-fill"></i>
+                                    {{ driver.rating.toFixed(1) }}
+                                </span>
+                                <span class="no-rating" *ngIf="driver.rating === undefined || driver.rating === null">-</span>
+                            </td>
+                            <td>
+                                <div class="performance-bar">
+                                    <div class="performance-fill" [ngClass]="getPerformanceClass(driver.success_rate)"
+                                         [style.width.%]="driver.success_rate"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Options d'export -->
+    <div class="export-section" *ngIf="canExport() && !loading">
+        <div class="section-header">
+            <h3>Options d'export</h3>
+            <p>Personnalisez votre rapport avant l'export</p>
+        </div>
+        
+        <div class="export-options card">
+            <div class="options-grid">
+                <div class="option-group">
+                    <label class="option-label">Format d'export</label>
+                    <div class="format-buttons">
+                        <button *ngFor="let format of exportFormats" 
+                                class="format-btn" 
+                                [class.active]="exportOptions.format === format.value"
+                                (click)="setExportFormat(format.value)">
+                            <i class="bi" [ngClass]="format.icon"></i>
+                            {{ format.label }}
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <label class="option-label">Inclure dans le rapport</label>
+                    <div class="checkboxes">
+                        <label class="checkbox-label">
+                            <input type="checkbox" [(ngModel)]="exportOptions.includeCharts">
+                            <span class="checkmark"></span>
+                            Graphiques et visualisations
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" [(ngModel)]="exportOptions.includeDetails" checked>
+                            <span class="checkmark"></span>
+                            Détails par livreur
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="export-preview">
+                <h4>Aperçu du rapport</h4>
+                <div class="preview-content">
+                    <div class="preview-item" *ngIf="exportOptions.includeCharts">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Graphiques statistiques</span>
+                    </div>
+                    <div class="preview-item">
+                        <i class="bi bi-table"></i>
+                        <span>Tableaux de données</span>
+                    </div>
+                    <div class="preview-item" *ngIf="exportOptions.includeDetails">
+                        <i class="bi bi-people"></i>
+                        <span>Performances détaillées</span>
+                    </div>
+                    <div class="preview-item">
+                        <i class="bi bi-calendar"></i>
+                        <span>Période : {{ getSelectedPeriodLabel() }}</span>
+                    </div>
+                </div>
+                
+                <div class="export-action">
+                    <button class="btn btn-primary btn-lg" (click)="exportReport()" [disabled]="exporting">
+                        <i class="bi bi-download"></i>
+                        {{ exporting ? 'Export en cours...' : 'Générer le rapport' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template de chargement -->
+    <div class="loading-section" *ngIf="loading">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h4>Chargement des rapports...</h4>
+            <p>Veuillez patienter pendant la génération des statistiques</p>
+        </div>
+    </div>
+
+    <!-- Aucune donnée -->
+    <div class="empty-section" *ngIf="!loading && (!reportData || !driverPerformance || driverPerformance.length === 0)">
+        <div class="empty-content">
+            <i class="bi bi-graph-up"></i>
+            <h4>Aucune donnée disponible</h4>
+            <p>Les rapports seront disponibles après quelques livraisons</p>
+        </div>
+    </div>
+</div>
